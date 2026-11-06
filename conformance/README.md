@@ -14,7 +14,7 @@ conformance/
   cases/
     001-marked-small-test/
       test_case.py            Python (pytest)
-      CaseTests.cs            C# (xUnit, FluentAssertions-style assertions)
+      CaseTests.cs            C# (xUnit, `Should()` assertions)
       case.test.ts            TypeScript (Vitest)
       expected.json           Findings, with the line in each language
 ```
@@ -31,10 +31,12 @@ conformance/
 
 ## Assertion APIs used
 
-The C# cases use the `Should().Be(expected, because)` shape, which FluentAssertions and its
-Apache-licensed fork AwesomeAssertions share. xUnit's own `Assert.Equal` has no message argument,
-so it cannot express DFA106; see [the adapter contract](../docs/adapters.md). TypeScript uses
-Vitest's `expect(value, message)`. Python uses a bare `assert` with a message.
+The rules do not depend on an assertion library. Each case uses a form that has a message slot in
+its language, so the expected findings are the same everywhere: `Should().Be(expected, because)` in
+C#, Vitest's `expect(value, message)` in TypeScript, and a bare `assert` with a message in Python.
+An API with no message slot, such as most of xUnit's `Assert`, gets a DFA106 warning instead of a
+finding; see [the adapter contract](../docs/adapters.md#message-slots). That needs a language-specific
+case, which is planned.
 
 ## Rule precedence in the cases
 
@@ -45,7 +47,8 @@ adapter must apply them the same way.
    only measure marked tests.
 2. DFA105 treats an unmarked body as one block, and a marked test per Then block. Its finding is
    on the first assertion past the first one.
-3. DFA106 reports every assertion without a message. DFA107 only scores messages that exist.
+3. DFA106 reports every assertion without a message: an error where the API has a message slot,
+   a warning where it has none. DFA107 only scores messages that exist.
 4. DFA108 reports the line of each `if`, loop or `try` statement in the test body.
 
 ## Cases
@@ -65,4 +68,5 @@ adapter must apply them the same way.
 
 Planned next cases: Act & Assert for an expected exception; a shared-context class whose fixture
 carries Arrange and Act; a medium test with two When/Then pairs; a marker misspelt (DFA102); an
-assertion in the Act block (DFA104); an inline exemption.
+assertion in the Act block (DFA104); an inline exemption; an assertion API with no message slot
+(DFA106 warning).

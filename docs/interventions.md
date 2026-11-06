@@ -88,8 +88,8 @@ The hook configuration ships as a template for `.claude/settings.json`. It is co
 instructions: the target repositories keep `AGENTS.md` as their only agent-instruction file and add
 no `CLAUDE.md`.
 
-**Cost per repository.** One settings template and one pre-commit entry. The tool itself installs
-once per machine through `uvx`.
+**Cost per repository.** One settings template and one pre-commit entry. The tool itself is a .NET
+tool, installed once per machine or run without installing through `dnx`.
 
 **How to measure.** The hook appends one line per firing to a local log under `.git/` (path, rules,
 whether the next check of that file was clean). From it: findings caught at edit time, and turns
@@ -159,16 +159,19 @@ every measure in section 6.
 
 ### What it does by default
 
-- **One CLI, `diffra-guardrails`**, published to PyPI and run through `uvx`. It dispatches to each
-  language's checker and prints one format:
+- **One CLI, `diffra-guardrails`**, written in C# and published to NuGet as a .NET tool, run
+  through `dnx` or `dotnet tool`. It dispatches to each language's checker and prints one format:
   - `check [--changed | --staged | --all] [--base <ref>] [--files ...] [--format agent|json|github|summary]`
   - `ingest --sarif <file> --eslint <file>` maps analyzer and ESLint output already produced by a
     build onto the shared finding shape, so CI never runs a checker twice;
   - `payload --out <dir>` writes the three Diffra payloads;
   - `hook claude`, `agents-md [--check]`, `new test`, `codemod markers`, `init`.
 
-  The CLI is written in Python because the first checker is, and because `uvx` gives one install
-  path on every machine that has uv. It uses only the standard library.
+  The CLI is C# because this repository's tooling is, and because the C# adapter's syntax-only
+  mode can live in the same tool. Each language's checker stays in the language it parses best: the
+  Python checker is Python (stdlib `ast` and `tokenize`) and the CLI runs it as a child process, so a
+  Python repository needs the .NET SDK only for the CLI, and can run the Python checker on its own
+  in the hook and pre-commit, with the same finding format.
 - **The marker codemod.** `codemod markers` inserts Arrange/Act/Assert comments only where the shape
   is unambiguous: an optional setup, a single Act statement, then only assertions. Everything else
   is listed, not touched. It only adds comments, and it proves this: in Python the `ast.dump` of
@@ -177,8 +180,8 @@ every measure in section 6.
 - **Runner plugins that improve failure output.** A pytest plugin and a Vitest reporter add one
   line under a failing assertion that has no message: which rule it breaks, and that a message
   saying what behaviour broke would let the reader skip the debugger. They also record each failure
-  with whether its assertion had a message. .NET is left out at first: FluentAssertions-style
-  failures already print the `because` text, and xUnit's own asserts have no message slot.
+  with whether its assertion had a message. .NET is left out at first: APIs with a message slot
+  already print it on failure, and APIs without one get the DFA106 warning instead.
 
 **Cost per repository.** None for the CLI. The codemod is one pull request. The runner plugins are
 one dev dependency and one line of configuration.
@@ -224,7 +227,9 @@ measurement in a Delta, so different budgets need different files.
   section 6, because it is how an agent would game the gate.
 - **Known cost of sparse payloads.** A file cleaned to zero shows as `removed`, which Diffra marks
   `needs-review`. Cleaning a file is a good change, so the action reports that case as "cleaned"
-  rather than as a problem. A Diffra option to treat a missing measurement as zero would remove it.
+  rather than as a problem. Whether a missing measurement can be read as zero is decided per
+  measurement: yes for violation counts, no for totals. A per-measurement declaration in Diffra
+  would remove the cost.
 
 ### Day one, with no friction
 
@@ -285,7 +290,7 @@ measure has a baseline.
 4. **Claude Code hook.** Measure first-push pass rate and edit-time catch.
 5. **Diffra rules files** and evaluation, once the payload has run on `main` long enough to trust
    the baseline.
-6. **Move the Python checker into this repository** behind the CLI, and publish it. Adopt it in the
+6. **Move the Python checker into this repository** behind the C# CLI, and publish both. Adopt it in the
    second Python repository from step 2 onwards.
 7. **C# adapter**: the syntax-only tool for the hook first, then the Roslyn analyzer for the IDE and
    CI. It passes the conformance corpus before any .NET repository adopts it. Diffra itself is the

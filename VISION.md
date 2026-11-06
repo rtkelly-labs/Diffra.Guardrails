@@ -93,7 +93,7 @@ never changes meaning and is never reused. Each language maps the rule onto its 
 | DFA103 | Act/When over budget for the test's size: small 1 statement; medium ≤ 2 When/Then pairs; large ≤ 4; every When followed by its Then | new and changed tests | Eager Test |
 | DFA104 | Assertion outside the Assert/Then block | new and changed tests | Checks hidden in setup |
 | DFA105 | More than one assertion in one Then, unless it is a single call to a custom assertion helper | new tests | Assertion Roulette |
-| DFA106 | Assertion with no failure message, where the assertion API allows one | new tests | Failures that need a debugger to read |
+| DFA106 | Assertion with no failure message; a warning, never gated, where the assertion API has no place for one | new tests | Failures that need a debugger to read |
 | DFA107 | Low-quality message: restates the expression, contains the expected literal, uses a generic phrase, or is under three words | score only | Messages written to satisfy DFA106 |
 | DFA108 | Control flow (`if`, loop, `try`) in a test body | new and changed tests | Conditional Test Logic |
 
@@ -214,7 +214,8 @@ change to the rules. And the mutation score of tests written under the rules is 
 ## Names
 
 The project is **Diffra Guardrails**, and the repository is `Diffra.Guardrails`. Rule IDs are `DFA`
-plus a three-digit number. Packages: `Diffra.Guardrails` (NuGet), `eslint-plugin-diffra` (npm) and
-`diffra-guardrails` (PyPI). Configuration lives with the Diffra configuration of the repository being
-checked. The project uses the Diffra protocol to share evidence and does not depend on the internals
+plus a three-digit number. Packages: `Diffra.Guardrails` (NuGet, the Roslyn analyzer),
+`Diffra.Guardrails.Tool` (NuGet, the `diffra-guardrails` CLI as a .NET tool), `eslint-plugin-diffra`
+(npm) and `diffra-guardrails` (PyPI, the Python checker). Configuration lives with the Diffra
+configuration of the repository being checked. The project uses the Diffra protocol to share evidence and does not depend on the internals
 of the Diffra host.

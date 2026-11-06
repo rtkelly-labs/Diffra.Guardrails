@@ -40,6 +40,7 @@
         "required": ["rule", "block", "line", "fix"],
         "properties": {
           "rule": { "type": "string", "pattern": "^DFA[0-9]{3}$" },
+          "severity": { "enum": ["error", "warning"], "default": "error" },
           "block": { "enum": ["Arrange", "Act", "Assert", "Given", "When", "Then", "Act & Assert", null] },
           "line": { "$ref": "#/$defs/perLanguageLine" },
           "fix": { "type": "string", "minLength": 1 }

@@ -34,28 +34,45 @@ comments are not flagged.
 
 ### Message slots
 
-DFA106 applies only where the assertion API has a place for a message. Where it has none, the
-adapter reports the assertion as `not-applicable` (counted, never a finding), and the repository
-decides whether to move to an API that has one.
+DFA106 is defined against one question, not against any assertion library: **does this assertion
+form have a place for a failure message?** Each adapter answers it for the forms it recognises, by
+API shape rather than package name, so a repository's choice of library never changes the rule.
 
-| API | Message slot | DFA106 |
+- **It has one, and it is empty:** a DFA106 finding, gated on new tests.
+- **It has one, and it is filled:** no finding. DFA107 scores the message.
+- **It has none:** a DFA106 warning, never gated. The warning says the API cannot carry a message,
+  so the reader knows the failure will need the expression to explain itself. Warnings are counted
+  in the score payload, so the repository sees how much of its suite cannot explain a failure and
+  decides for itself whether to change API or add a registered helper that takes a message.
+
+The warning uses fixed text, like every finding:
+
+```json
+{
+  "rule": "DFA106",
+  "severity": "warning",
+  "gated": false,
+  "message": "This assertion API has no place for a failure message.",
+  "fix": "Use an assertion form that takes a message, or wrap this check in a registered helper that does."
+}
+```
+
+What the first adapters will find, as examples rather than a list the rule depends on:
+
+| Assertion form | Message slot | DFA106 |
 | --- | --- | --- |
-| Python `assert` | `assert x, "msg"` | applies |
-| Python `unittest` asserts | `msg=` | applies |
-| `pytest.raises` / `pytest.warns` | none (`match=` checks the error, it is not a message) | not applicable; Act & Assert form |
-| xUnit `Assert.*` | only `Assert.True` / `Assert.False` take a message | not applicable except those two |
-| NUnit `Assert.That` | `message` argument | applies |
-| MSTest `Assert.*` | `message` argument | applies |
-| FluentAssertions / AwesomeAssertions | `because` argument | applies |
-| Shouldly | `customMessage` argument | applies |
-| Vitest `expect` | `expect(value, message)` | applies |
-| Jest `expect` | none without the `jest-expect-message` package | not applicable unless that package is present |
-| Expecto `Expect.*` | the last argument, which is required | always satisfied; DFA107 still scores it |
-| Unquote `test <@ ... @>` | none; the failure prints the reduced expression | not applicable |
-
-FluentAssertions moved to a commercial licence from version 8 (January 2025); AwesomeAssertions is
-the Apache-licensed community fork with the same API. The C# adapter recognises the `Should()` API
-shape, not a package name.
+| Python `assert` | `assert x, "msg"` | finding when empty |
+| Python `unittest` asserts | `msg=` | finding when empty |
+| `pytest.raises` / `pytest.warns` | none (`match=` checks the error, it is not a message) | not counted; Act & Assert form |
+| xUnit `Assert.True` / `Assert.False` | `userMessage` argument | finding when empty |
+| Other xUnit `Assert.*` | none | warning |
+| NUnit `Assert.That`, MSTest `Assert.*` | `message` argument | finding when empty |
+| `Should()` chains (FluentAssertions, AwesomeAssertions) | `because` argument | finding when empty |
+| Shouldly | `customMessage` argument | finding when empty |
+| Vitest `expect` | `expect(value, message)` | finding when empty |
+| Jest `expect` | none, unless `jest-expect-message` adds one | warning, or finding when the package is present |
+| Expecto `Expect.*` | the last argument, which is required | always filled; DFA107 still scores it |
+| Unquote `test <@ ... @>` | none; the failure prints the reduced expression | warning |
 
 ### Exemptions
 
@@ -90,6 +107,7 @@ GitHub annotations or a job summary.
   "test": "test_a_discount_code_changes_the_total_and_the_label",
   "block": "Assert",
   "scope": "new",
+  "severity": "error",
   "gated": true,
   "message": "This Assert block has 2 assertions; a Then checks one thing.",
   "fix": "Split this test in two, one per behaviour, or compare both values in one assertion."
@@ -99,6 +117,8 @@ GitHub annotations or a job summary.
 - `scope` is `new`, `changed` or `untouched`, relative to the merge-base. `gated` says whether this
   finding fails the changed-test gate. Untouched tests produce findings with `gated: false`; they feed
   the score only.
+- `severity` is `error` or `warning`. A warning is never gated; today the only one is DFA106 on an
+  assertion API with no message slot (see [message slots](#message-slots)).
 - `message` and `fix` are stable text per rule, with only counts and names substituted, so agent
   instructions can quote them.
 - The Roslyn and ESLint adapters already produce diagnostics in their own formats. They map to this
@@ -113,8 +133,8 @@ payloads:
 
 | Payload | `methodology` | Metrics | Evaluated |
 | --- | --- | --- | --- |
-| Structure | `test-structure-v1` | Per file, per rule: DFA101–DFA106 and DFA108 counts | Yes, fail on any absolute increase |
-| Score | `test-structure-score-v1` | Per file: DFA107 count, exemptions per rule | Yes, warn on any absolute increase |
+| Structure | `test-structure-v1` | Per file, per rule: DFA101–DFA106 and DFA108 error counts | Yes, fail on any absolute increase |
+| Score | `test-structure-score-v1` | Per file: DFA107 count, DFA106 warnings, exemptions per rule | Yes, warn on any absolute increase |
 | Totals | `test-structure-totals-v1` | Tests, assertions, assertions with a message, by size | No; reported beside the Delta only |
 
 ```json
@@ -138,9 +158,12 @@ Rules for the payload:
   as things improve, so it is never budgeted; "assertions without a message" is.
 - **Sparse by file.** A file appears only when it has a non-zero count. A new, clean test file then
   adds nothing, so it does not trigger `needs-review`. The cost: a file cleaned to zero appears as
-  `removed`, which Diffra treats as `needs-review`. Cleaning a file is rarer than adding one, so
-  sparse is the better default until Diffra can treat a missing measurement as zero for a
-  methodology (an open question for Diffra).
+  `removed`, which Diffra treats as `needs-review`.
+- **Missing means zero only where the measurement says so.** Whether an absent measurement reads as
+  zero is decided per measurement, not per payload. A violation count can say so, because a clean
+  file really has zero. A total, such as the number of tests, cannot, because a missing total means
+  nothing was measured. This needs a per-measurement declaration in Diffra (an open question for
+  Diffra); until it exists, the action reports a file cleaned to zero as "cleaned".
 - **Paths are keys.** File paths are object keys under `files`. Diffra addresses them by JSON
   Pointer, which escapes `/` as `~1`; the producer writes the plain path.
 - **Methodology changes are breaking.** Changing what a rule counts bumps the methodology version,

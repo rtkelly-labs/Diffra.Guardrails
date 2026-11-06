@@ -26,7 +26,8 @@ evidence. Read `VISION.md` first, then `docs/interventions.md` and `docs/adapter
 - Pull requests only, squash-merged, with linear history. Never commit to `main`.
 - Pull request titles follow Conventional Commits (`feat:`, `fix:`, `docs:`, `ci:` and so on).
 - Pin every GitHub Action to a full 40-character commit SHA, with the tag in a trailing comment.
-- No `.sh` or `.ps1` scripts. Repository tooling is Python, run through `uv run` (or `uvx`).
+- No `.sh` or `.ps1` scripts. Repository tooling is C#: a .NET file-based app (`dotnet run tool.cs`)
+  for a small script, a project for anything larger.
 - Keep CI cheap: lint only what changed in kind, never build what the job does not need.
 - Keep scratch files and worktrees under `temp/` (ignored). Keep task notes in an ignored `TODO.md`.
 

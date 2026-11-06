@@ -33,3 +33,49 @@ jobs:
             jq empty "$file" || { echo "::error file=$file::not valid JSON"; status=1; }
           done < <(git ls-files -z '*.json')
           exit "$status"
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DOTNET_NOLOGO: 'true'
+      DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          # Full history, without blobs, so later steps can resolve the merge-base.
+          fetch-depth: 0
+          filter: blob:none
+      # Filter here rather than with workflow-level `paths:`, so the job always reports and a
+      # required check never waits forever on a docs-only pull request.
+      - name: Decide
+        id: decide
+        env:
+          EVENT: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          MG_BASE: ${{ github.event.merge_group.base_sha }}
+          MG_HEAD: ${{ github.event.merge_group.head_sha }}
+        run: |
+          case "$EVENT" in
+            pull_request) base="$PR_BASE"; head="$PR_HEAD" ;;
+            merge_group) base="$MG_BASE"; head="$MG_HEAD" ;;
+            *) echo "run=true" >> "$GITHUB_OUTPUT"; exit 0 ;;
+          esac
+          changed="$(git diff --name-only "$base...$head")"
+          printf 'Changed files:\n%s\n' "$changed"
+          if grep -qE '^(src/|tests/|conformance/|global\.json$|Directory\.(Build|Packages)\.props$|[^/]*\.slnx$|\.github/workflows/ci\.yml$)' <<< "$changed"; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "No build or test inputs changed; skipping."
+          fi
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        if: steps.decide.outputs.run == 'true'
+        with:
+          global-json-file: global.json
+      - name: Test
+        if: steps.decide.outputs.run == 'true'
+        run: dotnet test Diffra.Guardrails.slnx -m:2

@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!--
+      Run under VSTest, not Microsoft.Testing.Platform. On the .NET 10 SDK, MTP mode forwards
+      unknown switches such as -m:2 to the test app, which rejects them, so
+      `dotnet test Diffra.Guardrails.slnx -m:2` would run no tests.
+    -->
+    <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="AwesomeAssertions" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="xunit.v3" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="AwesomeAssertions" />
+    <Using Include="Xunit" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Diffra.Guardrails.Core/Diffra.Guardrails.Core.csproj" />
+    <ProjectReference Include="../../src/Diffra.Guardrails.CSharp/Diffra.Guardrails.CSharp.csproj" />
+    <ProjectReference Include="../../src/Diffra.Guardrails.Tool/Diffra.Guardrails.Tool.csproj" />
+  </ItemGroup>
+</Project>

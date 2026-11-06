@@ -1,0 +1,29 @@
+{
+  "case": "003-unmarked-test-with-a-loop",
+  "summary": "No markers, and a loop runs the Act and the assertion for several inputs. The loop should be a data-driven test.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_no_discount_makes_the_total_negative",
+    "csharp": "BasketTests.No_discount_makes_the_total_negative",
+    "typescript": "no discount makes the total negative"
+  },
+  "findings": [
+    {
+      "rule": "DFG101",
+      "block": null,
+      "line": { "python": 4, "csharp": 8, "typescript": 4 },
+      "fix": "Add Arrange, Act and Assert markers (or Given, When and Then)."
+    },
+    {
+      "rule": "DFG108",
+      "block": null,
+      "line": { "python": 6, "csharp": 11, "typescript": 6 },
+      "fix": "Replace the loop with a data-driven test: one case per input."
+    }
+  ]
+}

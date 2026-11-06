@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Expected findings for one conformance case",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["case", "summary", "size", "files", "test", "findings"],
+  "$defs": {
+    "perLanguage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["python", "csharp", "typescript"],
+      "properties": {
+        "python": { "type": "string", "minLength": 1 },
+        "csharp": { "type": "string", "minLength": 1 },
+        "typescript": { "type": "string", "minLength": 1 }
+      }
+    },
+    "perLanguageLine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["python", "csharp", "typescript"],
+      "properties": {
+        "python": { "type": "integer", "minimum": 1 },
+        "csharp": { "type": "integer", "minimum": 1 },
+        "typescript": { "type": "integer", "minimum": 1 }
+      }
+    }
+  },
+  "properties": {
+    "case": { "type": "string", "pattern": "^[0-9]{3}-[a-z0-9-]+$" },
+    "summary": { "type": "string", "minLength": 1 },
+    "size": { "enum": ["small", "medium", "large"] },
+    "files": { "$ref": "#/$defs/perLanguage" },
+    "test": { "$ref": "#/$defs/perLanguage" },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["rule", "block", "line", "fix"],
+        "properties": {
+          "rule": { "type": "string", "pattern": "^DFA[0-9]{3}$" },
+          "block": { "enum": ["Arrange", "Act", "Assert", "Given", "When", "Then", "Act & Assert", null] },
+          "line": { "$ref": "#/$defs/perLanguageLine" },
+          "fix": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

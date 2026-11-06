@@ -1,0 +1,16 @@
+{
+  "case": "001-marked-small-test",
+  "summary": "A small test with Arrange, Act and Assert markers, a one-statement Act and one assertion with a message. It breaks no rule.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_a_percentage_discount_is_taken_off_the_total",
+    "csharp": "BasketTests.A_percentage_discount_is_taken_off_the_total",
+    "typescript": "a percentage discount is taken off the total"
+  },
+  "findings": []
+}

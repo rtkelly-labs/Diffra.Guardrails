@@ -1,0 +1,10 @@
+{
+  "config": {
+    "default": true,
+    // Prose is wrapped by hand; long table rows and links are fine.
+    "MD013": false,
+    // Each layer repeats the same sub-headings.
+    "MD024": { "siblings_only": true }
+  },
+  "ignores": ["node_modules/**", "temp/**"]
+}

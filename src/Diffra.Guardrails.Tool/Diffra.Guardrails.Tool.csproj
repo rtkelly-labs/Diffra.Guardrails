@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>diffra-guardrails</AssemblyName>
+    <RootNamespace>Diffra.Guardrails.Tool</RootNamespace>
+    <IsPackable>true</IsPackable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>diffra-guardrails</ToolCommandName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Diffra.Guardrails.Core/Diffra.Guardrails.Core.csproj" />
+    <ProjectReference Include="../Diffra.Guardrails.CSharp/Diffra.Guardrails.CSharp.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../Diffra.Guardrails.Core/Diffra.Guardrails.Core.csproj" />
+  </ItemGroup>
+</Project>

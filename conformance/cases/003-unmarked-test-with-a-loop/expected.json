@@ -14,13 +14,13 @@
   },
   "findings": [
     {
-      "rule": "DFA101",
+      "rule": "DFG101",
       "block": null,
       "line": { "python": 4, "csharp": 8, "typescript": 4 },
       "fix": "Add Arrange, Act and Assert markers (or Given, When and Then)."
     },
     {
-      "rule": "DFA108",
+      "rule": "DFG108",
       "block": null,
       "line": { "python": 6, "csharp": 11, "typescript": 6 },
       "fix": "Replace the loop with a data-driven test: one case per input."

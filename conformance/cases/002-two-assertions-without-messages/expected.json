@@ -14,19 +14,19 @@
   },
   "findings": [
     {
-      "rule": "DFA105",
+      "rule": "DFG105",
       "block": "Assert",
       "line": { "python": 13, "csharp": 18, "typescript": 13 },
       "fix": "Split this test in two, one per behaviour, or compare both values in one assertion."
     },
     {
-      "rule": "DFA106",
+      "rule": "DFG106",
       "block": "Assert",
       "line": { "python": 12, "csharp": 17, "typescript": 12 },
       "fix": "Add a message that says what behaviour this assertion protects."
     },
     {
-      "rule": "DFA106",
+      "rule": "DFG106",
       "block": "Assert",
       "line": { "python": 13, "csharp": 18, "typescript": 13 },
       "fix": "Add a message that says what behaviour this assertion protects."

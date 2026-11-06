@@ -1,6 +1,6 @@
 # Diffra.Guardrails
 
-Constraints on the shape of tests (rules DFA101–DFA108), checked per language and emitted as Diffra
+Constraints on the shape of tests (rules DFG101–DFG108), checked per language and emitted as Diffra
 evidence. Read `VISION.md` first, then `docs/interventions.md` and `docs/adapters.md`.
 
 ## Agent instructions

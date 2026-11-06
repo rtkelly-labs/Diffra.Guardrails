@@ -14,7 +14,7 @@ tell whether it helps. The roll-out order is at the end.
 
 - **One rule text, many surfaces.** The `AGENTS.md` block, the skill, hook output, annotations and
   the job summary all render the same per-rule `message` and `fix` text. Change it once.
-- **The DFA rules are syntactic.** Every rule can be checked from one file's syntax tree and its
+- **The DFG rules are syntactic.** Every rule can be checked from one file's syntax tree and its
   comments, with no build and no test run. That is what makes edit-time feedback fast enough to put
   in an agent's loop, including for C#.
 - **Measure, then intervene.** Each intervention is switched on only after the measure it should
@@ -114,7 +114,7 @@ toolchain install would cost more minutes than the check.
   without downloading old file contents. A test is new when its qualified name is absent at the
   merge-base, and changed when the diff touches its span. An unresolvable merge-base fails with a
   hint; it never passes silently.
-- **Annotations.** Each gated finding becomes `::error file=...,line=...,title=DFA105::<message>`.
+- **Annotations.** Each gated finding becomes `::error file=...,line=...,title=DFG105::<message>`.
   GitHub keeps only about ten error annotations per step and drops the rest without saying so, so
   the action writes the first ten and one `::notice` pointing to the job summary for the rest.
 - **Job summary.** Gated findings with their fixes; the score change by rule, and the files whose
@@ -176,17 +176,17 @@ every measure in section 6.
   is unambiguous: an optional setup, a single Act statement, then only assertions. Everything else
   is listed, not touched. It only adds comments, and it proves this: in Python the `ast.dump` of
   each file is identical before and after; in C# and TypeScript the token stream minus comments is
-  compared. It is run once per repository, as its own pull request, and clears most of DFA101.
+  compared. It is run once per repository, as its own pull request, and clears most of DFG101.
 - **Runner plugins that improve failure output.** A pytest plugin and a Vitest reporter add one
   line under a failing assertion that has no message: which rule it breaks, and that a message
   saying what behaviour broke would let the reader skip the debugger. They also record each failure
   with whether its assertion had a message. .NET is left out at first: APIs with a message slot
-  already print it on failure, and APIs without one get the DFA106 warning instead.
+  already print it on failure, and APIs without one get the DFG106 warning instead.
 
 **Cost per repository.** None for the CLI. The codemod is one pull request. The runner plugins are
 one dev dependency and one line of configuration.
 
-**How to measure.** For the codemod: DFA101 count before and after, and no change in test results.
+**How to measure.** For the codemod: DFG101 count before and after, and no change in test results.
 For the runner plugins: the share of CI test failures whose assertion had a message, and, where an
 agent fixes the failure, the number of turns it took, compared between messaged and unmessaged
 failures.
@@ -270,7 +270,7 @@ comparison.
   score shows whether following them made tests better at catching faults (Just et al., FSE 2014;
   Petrović et al., ICSE 2021). It runs on a weekly schedule over changed modules only, never per pull
   request, to keep minutes down. It compares tests written under the rules with tests written
-  before them in the same modules. If DFA105 makes new tests kill fewer mutants, DFA105 changes.
+  before them in the same modules. If DFG105 makes new tests kill fewer mutants, DFG105 changes.
 - **Roll-up.** A monthly scheduled workflow in each repository reads the last month's run records
   through the GitHub API (artifacts expire, so it runs well inside the retention window) and writes
   them as a Diffra metrics payload, so the trend itself is evidence with a baseline.

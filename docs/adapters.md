@@ -1,6 +1,6 @@
 # Adapter contract
 
-An adapter brings one language under the DFA rules. It reads test files, never runs them, and emits
+An adapter brings one language under the DFG rules. It reads test files, never runs them, and emits
 findings in one shared format. This page defines what an adapter must answer, what it must emit, and
 which existing linter rules it reuses instead of rebuilding.
 
@@ -22,25 +22,25 @@ a language's syntax.
 
 **Registered helpers** are custom assertion functions named in the repository's configuration (or,
 in Python, matched by an `assert_*` name). One call to a registered helper counts as one assertion
-for DFA105, which is how a test checks a compound value without breaking the one-assertion rule.
+for DFG105, which is how a test checks a compound value without breaking the one-assertion rule.
 
 ### Markers
 
 The marker grammar is the same everywhere: a line comment whose whole text is one of `Arrange`,
 `Act`, `Assert`, `Act & Assert`, `Given`, `When`, `Then`, in the language's line-comment syntax
 (`#` or `//`). A comment with more words after a marker (`# Given a repo`) is description, not a
-marker. Typo matching for DFA102 applies only to single words of four or more letters, so ordinary
+marker. Typo matching for DFG102 applies only to single words of four or more letters, so ordinary
 comments are not flagged.
 
 ### Message slots
 
-DFA106 is defined against one question, not against any assertion library: **does this assertion
+DFG106 is defined against one question, not against any assertion library: **does this assertion
 form have a place for a failure message?** Each adapter answers it for the forms it recognises, by
 API shape rather than package name, so a repository's choice of library never changes the rule.
 
-- **It has one, and it is empty:** a DFA106 finding, gated on new tests.
-- **It has one, and it is filled:** no finding. DFA107 scores the message.
-- **It has none:** a DFA106 warning, never gated. The warning says the API cannot carry a message,
+- **It has one, and it is empty:** a DFG106 finding, gated on new tests.
+- **It has one, and it is filled:** no finding. DFG107 scores the message.
+- **It has none:** a DFG106 warning, never gated. The warning says the API cannot carry a message,
   so the reader knows the failure will need the expression to explain itself. Warnings are counted
   in the score payload, so the repository sees how much of its suite cannot explain a failure and
   decides for itself whether to change API or add a registered helper that takes a message.
@@ -49,7 +49,7 @@ The warning uses fixed text, like every finding:
 
 ```json
 {
-  "rule": "DFA106",
+  "rule": "DFG106",
   "severity": "warning",
   "gated": false,
   "message": "This assertion API has no place for a failure message.",
@@ -59,7 +59,7 @@ The warning uses fixed text, like every finding:
 
 What the first adapters will find, as examples rather than a list the rule depends on:
 
-| Assertion form | Message slot | DFA106 |
+| Assertion form | Message slot | DFG106 |
 | --- | --- | --- |
 | Python `assert` | `assert x, "msg"` | finding when empty |
 | Python `unittest` asserts | `msg=` | finding when empty |
@@ -71,7 +71,7 @@ What the first adapters will find, as examples rather than a list the rule depen
 | Shouldly | `customMessage` argument | finding when empty |
 | Vitest `expect` | `expect(value, message)` | finding when empty |
 | Jest `expect` | none, unless `jest-expect-message` adds one | warning, or finding when the package is present |
-| Expecto `Expect.*` | the last argument, which is required | always filled; DFA107 still scores it |
+| Expecto `Expect.*` | the last argument, which is required | always filled; DFG107 still scores it |
 | Unquote `test <@ ... @>` | none; the failure prints the reduced expression | warning |
 
 ### Exemptions
@@ -81,9 +81,9 @@ a reason. Every exemption is counted per rule as evidence.
 
 | Language | Form |
 | --- | --- |
-| Python | `# dfa: allow DFA105 -- one value, two views of it` on the line, or the line above |
-| C# | `#pragma warning disable DFA105 // reason` or `[SuppressMessage("Diffra.Guardrails", "DFA105", Justification = "...")]`; counted from the SARIF log's suppression records |
-| TypeScript | `// eslint-disable-next-line diffra/dfa105 -- reason`; counted from ESLint's `suppressedMessages` |
+| Python | `# dfg: allow DFG105 -- one value, two views of it` on the line, or the line above |
+| C# | `#pragma warning disable DFG105 // reason` or `[SuppressMessage("Diffra.Guardrails", "DFG105", Justification = "...")]`; counted from the SARIF log's suppression records |
+| TypeScript | `// eslint-disable-next-line diffra/dfg105 -- reason`; counted from ESLint's `suppressedMessages` |
 | F# | The FSharp.Analyzers.SDK suppression comment, with a reason |
 
 An exemption without a reason is an error from the adapter, never a counted exemption. (If it needs
@@ -100,7 +100,7 @@ GitHub annotations or a job summary.
 
 ```json
 {
-  "rule": "DFA105",
+  "rule": "DFG105",
   "path": "tests/test_basket.py",
   "line": 13,
   "endLine": 13,
@@ -117,7 +117,7 @@ GitHub annotations or a job summary.
 - `scope` is `new`, `changed` or `untouched`, relative to the merge-base. `gated` says whether this
   finding fails the changed-test gate. Untouched tests produce findings with `gated: false`; they feed
   the score only.
-- `severity` is `error` or `warning`. A warning is never gated; today the only one is DFA106 on an
+- `severity` is `error` or `warning`. A warning is never gated; today the only one is DFG106 on an
   assertion API with no message slot (see [message slots](#message-slots)).
 - `message` and `fix` are stable text per rule, with only counts and names substituted, so agent
   instructions can quote them.
@@ -133,8 +133,8 @@ payloads:
 
 | Payload | `methodology` | Metrics | Evaluated |
 | --- | --- | --- | --- |
-| Structure | `test-structure-v1` | Per file, per rule: DFA101–DFA106 and DFA108 error counts | Yes, fail on any absolute increase |
-| Score | `test-structure-score-v1` | Per file: DFA107 count, DFA106 warnings, exemptions per rule | Yes, warn on any absolute increase |
+| Structure | `test-structure-v1` | Per file, per rule: DFG101–DFG106 and DFG108 error counts | Yes, fail on any absolute increase |
+| Score | `test-structure-score-v1` | Per file: DFG107 count, DFG106 warnings, exemptions per rule | Yes, warn on any absolute increase |
 | Totals | `test-structure-totals-v1` | Tests, assertions, assertions with a message, by size | No; reported beside the Delta only |
 
 ```json
@@ -144,8 +144,8 @@ payloads:
   "metrics": {
     "files": {
       "tests/Pricing.Tests/BasketTests.cs": {
-        "DFA101": { "value": 12, "unit": "violations" },
-        "DFA106": { "value": 30, "unit": "violations" }
+        "DFG101": { "value": 12, "unit": "violations" },
+        "DFG106": { "value": 30, "unit": "violations" }
       }
     }
   }
@@ -171,23 +171,23 @@ Rules for the payload:
 
 ## Reuse or build
 
-Reuse an existing rule wherever it fully covers a DFA rule, enable complementary rules that check
+Reuse an existing rule wherever it fully covers a DFG rule, enable complementary rules that check
 nearby problems, and build only the gap. Anything that needs the marker block model (which line is
 in which block) is a build in every language, because no existing tool knows about markers beyond
 "is there a comment".
 
-| DFA rule | Python (Ruff) | C# (Roslyn) | TypeScript (ESLint) |
+| DFG rule | Python (Ruff) | C# (Roslyn) | TypeScript (ESLint) |
 | --- | --- | --- | --- |
-| DFA101 markers present | Build | Build. StrictCSharp.Analyzers checks AAA comments, but not Given/When/Then or blocks; do not run both | Build |
-| DFA102 marker spelling and order | Build | Build, with a code fix | Build, with an autofix |
-| DFA103 Act budget by size | Build | Build | Build |
-| DFA104 assertion outside Assert | Build. Enable PT017 (assert in `except`) alongside | Build | Build. Enable `vitest/no-standalone-expect` and `vitest/no-conditional-expect` alongside |
-| DFA105 one assertion per Then | Build. Enable PT018 (split composite `assert a and b`) alongside | Build | Build. `vitest/max-expects` with `max: 1` is equivalent only for one-Then tests and ignores helpers; use it as a stopgap before the plugin exists |
-| DFA106 message present | Build (no Ruff rule exists) | Build | Build (no Vitest rule exists; `vitest/require-to-throw-message` is about thrown errors, not assertion messages) |
-| DFA107 message quality | Build | Build | Build |
-| DFA108 no control flow | Build | Build | Partial reuse. `vitest/no-conditional-in-test` flags `if` statements only. Until the plugin exists, core `no-restricted-syntax` scoped to test files can ban loops, `try` and `switch` |
+| DFG101 markers present | Build | Build. StrictCSharp.Analyzers checks AAA comments, but not Given/When/Then or blocks; do not run both | Build |
+| DFG102 marker spelling and order | Build | Build, with a code fix | Build, with an autofix |
+| DFG103 Act budget by size | Build | Build | Build |
+| DFG104 assertion outside Assert | Build. Enable PT017 (assert in `except`) alongside | Build | Build. Enable `vitest/no-standalone-expect` and `vitest/no-conditional-expect` alongside |
+| DFG105 one assertion per Then | Build. Enable PT018 (split composite `assert a and b`) alongside | Build | Build. `vitest/max-expects` with `max: 1` is equivalent only for one-Then tests and ignores helpers; use it as a stopgap before the plugin exists |
+| DFG106 message present | Build (no Ruff rule exists) | Build | Build (no Vitest rule exists; `vitest/require-to-throw-message` is about thrown errors, not assertion messages) |
+| DFG107 message quality | Build | Build | Build |
+| DFG108 no control flow | Build | Build | Partial reuse. `vitest/no-conditional-in-test` flags `if` statements only. Until the plugin exists, core `no-restricted-syntax` scoped to test files can ban loops, `try` and `switch` |
 | Act & Assert form | Reuse PT012 (one simple statement in a `raises` block) and PT011 (`raises` too broad) | Build | Build |
-| Test has an assertion at all | Build (falls out of DFA105 counting) | Reuse SonarAnalyzer S2699 where Sonar runs | Reuse `vitest/expect-expect` |
+| Test has an assertion at all | Build (falls out of DFG105 counting) | Reuse SonarAnalyzer S2699 where Sonar runs | Reuse `vitest/expect-expect` |
 
 Notes:
 
@@ -196,7 +196,7 @@ Notes:
 - **Roslyn and ESLint diagnostics come with editor support for free.** That is the main reason C#
   and TypeScript get analyzer and plugin hosts rather than standalone programs.
 - **F# needs FSharp.Analyzers.SDK.** Roslyn does not see F# syntax. The F# adapter comes last and
-  starts with DFA101, DFA104 and DFA108.
+  starts with DFG101, DFG104 and DFG108.
 - **Complementary rules are configured, not wrapped.** The repository's own Ruff, analyzer or ESLint
   configuration enables them. Guardrails ships the recommended settings as a template and does not
   re-report their findings.

@@ -34,7 +34,7 @@ conformance/
 The rules do not depend on an assertion library. Each case uses a form that has a message slot in
 its language, so the expected findings are the same everywhere: `Should().Be(expected, because)` in
 C#, Vitest's `expect(value, message)` in TypeScript, and a bare `assert` with a message in Python.
-An API with no message slot, such as most of xUnit's `Assert`, gets a DFA106 warning instead of a
+An API with no message slot, such as most of xUnit's `Assert`, gets a DFG106 warning instead of a
 finding; see [the adapter contract](../docs/adapters.md#message-slots). That needs a language-specific
 case, which is planned.
 
@@ -43,21 +43,21 @@ case, which is planned.
 These are the conventions the expected findings follow. The first checker settled them, and every
 adapter must apply them the same way.
 
-1. When DFA101 fires (no markers), DFA102, DFA103 and DFA104 are not reported for that test. They
+1. When DFG101 fires (no markers), DFG102, DFG103 and DFG104 are not reported for that test. They
    only measure marked tests.
-2. DFA105 treats an unmarked body as one block, and a marked test per Then block. Its finding is
+2. DFG105 treats an unmarked body as one block, and a marked test per Then block. Its finding is
    on the first assertion past the first one.
-3. DFA106 reports every assertion without a message: an error where the API has a message slot,
-   a warning where it has none. DFA107 only scores messages that exist.
-4. DFA108 reports the line of each `if`, loop or `try` statement in the test body.
+3. DFG106 reports every assertion without a message: an error where the API has a message slot,
+   a warning where it has none. DFG107 only scores messages that exist.
+4. DFG108 reports the line of each `if`, loop or `try` statement in the test body.
 
 ## Cases
 
 | Case | Shows | Expected |
 | --- | --- | --- |
 | 001-marked-small-test | The target shape: markers, one Act statement, one assertion with a message | none |
-| 002-two-assertions-without-messages | Assertion Roulette: two checks in one Assert, no messages | DFA105, DFA106 ×2 |
-| 003-unmarked-test-with-a-loop | No markers; a loop where a data-driven test belongs | DFA101, DFA108 |
+| 002-two-assertions-without-messages | Assertion Roulette: two checks in one Assert, no messages | DFG105, DFG106 ×2 |
+| 003-unmarked-test-with-a-loop | No markers; a loop where a data-driven test belongs | DFG101, DFG108 |
 
 ## Adding a case
 
@@ -67,6 +67,6 @@ adapter must apply them the same way.
 4. CI checks that the JSON parses. The adapters' own CI checks the findings.
 
 Planned next cases: Act & Assert for an expected exception; a shared-context class whose fixture
-carries Arrange and Act; a medium test with two When/Then pairs; a marker misspelt (DFA102); an
-assertion in the Act block (DFA104); an inline exemption; an assertion API with no message slot
-(DFA106 warning).
+carries Arrange and Act; a medium test with two When/Then pairs; a marker misspelt (DFG102); an
+assertion in the Act block (DFG104); an inline exemption; an assertion API with no message slot
+(DFG106 warning).

@@ -1,7 +1,7 @@
 # Diffra Guardrails: vision
 
 Status: proposal, 6 November 2026. Nothing here is built yet in this repository. A first Python
-checker for rules DFA101–DFA108 is being trialled in one private codebase and will move here once
+checker for rules DFG101–DFG108 is being trialled in one private codebase and will move here once
 it has proved itself.
 
 ## Purpose
@@ -64,11 +64,11 @@ The research sets honest limits on the claim:
   the rules aim at readability, diagnosis and maintenance. Whether a test finds bugs is measured
   separately, by mutation score.
 - **Only some bans pay.** Boogerd and Moonen (around 2008) checked MISRA C rules against recorded
-  faults and found that only some correlated with faults; the rest added work. Each DFA rule
+  faults and found that only some correlated with faults; the rest added work. Each DFG rule
   therefore needs a stated failure mode it prevents and a measure that shows it, and is retired if
   the measure does not move.
 - **Assertion count matters.** Zhang and Mesbah (FSE 2015) found that the number of assertions
-  correlates strongly with a suite's effectiveness. DFA105 (one assertion per Then) must not
+  correlates strongly with a suite's effectiveness. DFG105 (one assertion per Then) must not
   quietly reduce what a suite checks. Its intended fix is one assertion over a whole value (a
   record, tuple or object) or a split into more tests, not a deleted check. The mutation score of
   new tests is the check on this (see [Measurement](#measurement)).
@@ -83,21 +83,23 @@ unreliable, so it is used only for warnings and for one-off migrations.
 
 ## Rules
 
-Rule IDs use one prefix, `DFA`, with a number range for each family, as Roslyn analyzers do. An ID
-never changes meaning and is never reused. Each language maps the rule onto its own syntax.
+Rule IDs use one prefix, `DFG` (Diffra Guardrails), with a number range for each family, as .NET
+analyzers do with `CA` and `IDE`. An ID never changes meaning and is never reused. Each language maps
+the rule onto its own syntax. The checker being trialled uses the earlier prefix `DFA` with the same
+numbers; it switches to `DFG` when it moves here, before any release.
 
 | ID | Rule | Gate | Prevents |
 | --- | --- | --- | --- |
-| DFA101 | Test has no `Arrange/Act/Assert` or `Given/When/Then` markers | new and changed tests | Intent nobody can review |
-| DFA102 | Marker misspelt or out of order (autofix to the exact form) | new and changed tests | Markers that drift until they mean nothing |
-| DFA103 | Act/When over budget for the test's size: small 1 statement; medium ≤ 2 When/Then pairs; large ≤ 4; every When followed by its Then | new and changed tests | Eager Test |
-| DFA104 | Assertion outside the Assert/Then block | new and changed tests | Checks hidden in setup |
-| DFA105 | More than one assertion in one Then, unless it is a single call to a custom assertion helper | new tests | Assertion Roulette |
-| DFA106 | Assertion with no failure message; a warning, never gated, where the assertion API has no place for one | new tests | Failures that need a debugger to read |
-| DFA107 | Low-quality message: restates the expression, contains the expected literal, uses a generic phrase, or is under three words | score only | Messages written to satisfy DFA106 |
-| DFA108 | Control flow (`if`, loop, `try`) in a test body | new and changed tests | Conditional Test Logic |
+| DFG101 | Test has no `Arrange/Act/Assert` or `Given/When/Then` markers | new and changed tests | Intent nobody can review |
+| DFG102 | Marker misspelt or out of order (autofix to the exact form) | new and changed tests | Markers that drift until they mean nothing |
+| DFG103 | Act/When over budget for the test's size: small 1 statement; medium ≤ 2 When/Then pairs; large ≤ 4; every When followed by its Then | new and changed tests | Eager Test |
+| DFG104 | Assertion outside the Assert/Then block | new and changed tests | Checks hidden in setup |
+| DFG105 | More than one assertion in one Then, unless it is a single call to a custom assertion helper | new tests | Assertion Roulette |
+| DFG106 | Assertion with no failure message; a warning, never gated, where the assertion API has no place for one | new tests | Failures that need a debugger to read |
+| DFG107 | Low-quality message: restates the expression, contains the expected literal, uses a generic phrase, or is under three words | score only | Messages written to satisfy DFG106 |
+| DFG108 | Control flow (`if`, loop, `try`) in a test body | new and changed tests | Conditional Test Logic |
 
-DFA105 and DFA106 gate only **new** tests. Editing an old test makes you fix its structure, not
+DFG105 and DFG106 gate only **new** tests. Editing an old test makes you fix its structure, not
 rewrite every assertion in it. This is the choice the first checker made after meeting a real
 codebase, and it is what keeps the gate cheap to adopt.
 
@@ -105,14 +107,14 @@ Accepted forms:
 
 - **Act & Assert** is the one combined marker. It is for asserting an exception or rejection, as in
   `pytest.raises`, `Assert.Throws` or `expect(...).rejects`. Such a form counts as an assertion for
-  DFA104 only.
+  DFG104 only.
 - **No Arrange** when there is nothing to set up.
 - **Shared context:** a fixture or class setup carries the Arrange/Act markers, and each test carries
   only Assert. The checker finds the fixture's markers by looking up the fixture.
 - **Data-driven tests** (`parametrize`, `[Theory]`, `test.each`) are one test. The case table is
   data, not Arrange statements.
 
-Precedence: when DFA101 fires, DFA102–DFA104 are not reported for that test, and DFA105 treats the
+Precedence: when DFG101 fires, DFG102–DFG104 are not reported for that test, and DFG105 treats the
 unmarked body as one block. The [conformance corpus](conformance/README.md) pins these conventions.
 
 **Exemptions** are written inline, name one rule ID and give a reason, and are counted as evidence in
@@ -145,7 +147,7 @@ existing linter rules each adapter reuses rather than rebuilds, are in
 | Language | Host | Status |
 | --- | --- | --- |
 | Python | stdlib `ast` plus `tokenize`; no third-party parser | first version being trialled; moves here when proven |
-| C# | Roslyn analyzer, shipped as `Diffra.Guardrails` on NuGet, with code fixes for DFA102 | next |
+| C# | Roslyn analyzer, shipped as `Diffra.Guardrails` on NuGet, with code fixes for DFG102 | next |
 | TypeScript / JavaScript | ESLint plugin, `eslint-plugin-diffra`, covering Vitest and Jest | next |
 | F# | FSharp.Analyzers.SDK (Roslyn does not cover F#) | later |
 
@@ -204,7 +206,7 @@ until the adapter contract has held for three languages.
 
 ## Success test
 
-The same test case, written in Python, C# and TypeScript, produces the same DFA findings in all
+The same test case, written in Python, C# and TypeScript, produces the same DFG findings in all
 three. An agent given only the finding text can fix the test. A change that adds a test with two
 Thens, or an assertion with no message, fails its gate. The same change to an existing, untouched
 test does not fail but shows in the repository score. Diffra reports the score change against the
@@ -213,7 +215,7 @@ change to the rules. And the mutation score of tests written under the rules is 
 
 ## Names
 
-The project is **Diffra Guardrails**, and the repository is `Diffra.Guardrails`. Rule IDs are `DFA`
+The project is **Diffra Guardrails**, and the repository is `Diffra.Guardrails`. Rule IDs are `DFG`
 plus a three-digit number. Packages: `Diffra.Guardrails` (NuGet, the Roslyn analyzer),
 `Diffra.Guardrails.Tool` (NuGet, the `diffra-guardrails` CLI as a .NET tool), `eslint-plugin-diffra`
 (npm) and `diffra-guardrails` (PyPI, the Python checker). Configuration lives with the Diffra

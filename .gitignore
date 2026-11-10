@@ -2,3 +2,27 @@ temp/
 TODO.md
 node_modules/
 .DS_Store
+
+# Local TODO files
+todo.md
+
+# Bespoke agent instruction files. AGENTS.md is the single source of truth, and a per-tool copy shadows it.
+.github/copilot-instructions.md
+.github/instructions/
+.cursorrules
+.cursor/rules/
+.windsurfrules
+.windsurf/rules/
+.clinerules
+GEMINI.md
+codex.md
+.aider.conf.yml
+.aiderignore
+.continuerules
+.continue/rules/
+.roorules
+.roo/rules/
+.kiro/steering/
+.amazonq/rules/
+.junie/guidelines.md
+AGENT.md

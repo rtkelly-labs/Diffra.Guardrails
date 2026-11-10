@@ -41,7 +41,6 @@ npx markdownlint-cli2 <changed .md files>
 jq empty <changed .json files>
 ```
 
-
 ## 🛑 Repository Conventions & Workflow Policy
 
 1. **Squash Merge Only**: All pull requests must be merged into `main` using **Squash and Merge** exclusively.

@@ -24,25 +24,35 @@ We follow a strict, modern GitHub workflow across our repositories:
 2. **Linear History & Rebase**:
    - We enforce a strictly linear history on `main`.
    - Before opening a PR or marking it ready for review, rebase your branch on latest `main`:
+
      ```bash
+
      git fetch origin
      git rebase origin/main
+
      ```
 
 3. **Code Quality & Testing**:
    - Ensure your code passes all local linting, type checks, and automated tests.
    - For Python projects:
+
      ```bash
+
      uv run ruff check .
      uv run ruff format --check .
      uv run pyright
      uv run pytest
+
      ```
+
    - For TypeScript/Node projects:
+
      ```bash
+
      pnpm lint
      pnpm typecheck
      pnpm test
+
      ```
 
 4. **Pull Requests**:

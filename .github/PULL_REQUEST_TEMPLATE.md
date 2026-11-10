@@ -1,3 +1,5 @@
+# Pull Request
+
 ## Summary
 
 <!-- Briefly describe the changes introduced in this PR and their rationale. -->
@@ -5,7 +7,7 @@
 ## Linked Issues
 
 <!-- Link any relevant issues below (e.g. Closes #123, Fixes #456). -->
-- Resolves: 
+- Resolves:
 
 ## Type of Change
 

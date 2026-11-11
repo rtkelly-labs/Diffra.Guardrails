@@ -30,5 +30,5 @@
 
 - [ ] My branch is rebased onto latest `main` with a clean linear history.
 - [ ] Unit and/or integration tests have been added or updated.
-- [ ] All required CI checks pass (`ci` / `test` / `lint`).
+- [ ] All required CI checks pass (`lint`).
 - [ ] Relevant documentation has been updated.

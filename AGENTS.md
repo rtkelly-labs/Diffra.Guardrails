@@ -46,11 +46,9 @@ jq empty <changed .json files>
 1. **Squash Merge Only**: All pull requests must be merged into `main` using **Squash and Merge** exclusively.
 2. **Delete Branch on Merge**: Feature branches must be automatically deleted immediately upon merge into `main`.
 3. **Linear History**: Maintain a strictly linear history. Rebase feature branches onto `main` before merging.
-4. **Direct Push Protection**: Direct pushes to `main` are blocked; PR mechanism required (force push allowed).
+4. **Direct Push Protection**: Direct pushes to `main` are blocked; PR mechanism required.
 5. **Local Temp & Worktree Directory**: All temporary files, databases, and worktrees go in `/temp/` (gitignored).
-6. **Gitignored Local TODO File**: A root `TODO.md` file MUST exist for local task tracking and be gitignored.
+6. **Local Task Notes**: Keep local task notes in the ignored `TODO.md`.
 7. **Auto-Merge Enabled**: PRs may enable auto-merge (squash) so they merge automatically once required checks pass.
 8. **Pinned Action SHAs**: All GitHub Actions workflows MUST use 40-character commit SHAs instead of mutable tags.
-9. **Script Language Policy**: Automation scripts in `scripts/` MUST use the repository's approved
-   language stack (e.g., C# `.cs` for .NET, TypeScript/JavaScript for Node, Python `.py` for Python).
-   Alien scripting runtimes (e.g., `.py` in C# repos, `.sh`/`.ps1` everywhere) are prohibited.
+9. **Script Language Policy**: Automation scripts in `scripts/` MUST use C# (`.cs`) executed via `dotnet run`. Alien scripting runtimes (e.g., `.py` in C# repos, `.sh`/`.ps1` everywhere) are prohibited.

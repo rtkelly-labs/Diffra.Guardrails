@@ -12,7 +12,7 @@ All contributors and maintainers are expected to follow the [Code of Conduct](CO
 
 ## Development Workflow
 
-We follow a strict, modern GitHub workflow across our repositories:
+We follow a clean, consistent GitHub workflow:
 
 1. **Fork or Branch**:
    - Create a feature or bugfix branch using clear naming:
@@ -26,33 +26,15 @@ We follow a strict, modern GitHub workflow across our repositories:
    - Before opening a PR or marking it ready for review, rebase your branch on latest `main`:
 
      ```bash
-
      git fetch origin
      git rebase origin/main
-
      ```
 
 3. **Code Quality & Testing**:
-   - Ensure your code passes all local linting, type checks, and automated tests.
-   - For Python projects:
+   - Ensure your code passes all local linting, conformance tests, and automated checks:
 
      ```bash
-
-     uv run ruff check .
-     uv run ruff format --check .
-     uv run pyright
-     uv run pytest
-
-     ```
-
-   - For TypeScript/Node projects:
-
-     ```bash
-
-     pnpm lint
-     pnpm typecheck
-     pnpm test
-
+     npx markdownlint-cli2 **/*.md
      ```
 
 4. **Pull Requests**:

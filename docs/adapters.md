@@ -159,11 +159,17 @@ Each adapter (or the wrapper on its behalf) writes Diffra's published metrics pa
 set of thresholds to every measurement in a payload, metrics with different budgets go in different
 payloads:
 
-| Payload | `methodology` | Metrics | Evaluated |
-| --- | --- | --- | --- |
-| Structure | `test-structure-v1` | Per file, per rule: DFG101–DFG106 and DFG108 error counts | Yes, fail on any absolute increase |
-| Score | `test-structure-score-v1` | Per file: DFG107 count, DFG106 warnings, exemptions per rule | Yes, warn on any absolute increase |
-| Totals | `test-structure-totals-v1` | Tests, assertions, assertions with a message, by size | No; reported beside the Delta only |
+| Payload | Evidence type ID | `methodology` | Metrics | Evaluated |
+| --- | --- | --- | --- | --- |
+| Structure | `diffra.guardrails.test-structure` | `test-structure-v1` | Per file, per rule: DFG101–DFG106 and DFG108 error counts | Yes, fail on any absolute increase |
+| Score | `diffra.guardrails.test-structure-score` | `test-structure-score-v1` | Per file: DFG107 count, DFG106 warnings, exemptions per rule | Yes, warn on any absolute increase |
+| Totals | `diffra.guardrails.test-structure-totals` | `test-structure-totals-v1` | Tests, assertions, assertions with a message, by size | No; reported beside the Delta only |
+
+The evidence type ID is what `diffra collect` takes as `--type-id`, with `--type-version 1.0`. It
+names what the evidence means and is not part of the payload file. Each payload becomes its own
+Evidence document, and Diffra compares two documents only when their type ID and version match.
+The two evaluated types share their names with the rules files that budget them (see
+[baseline and ratchet](interventions.md#5-baseline-and-ratchet)).
 
 ```json
 {
@@ -190,8 +196,9 @@ Rules for the payload:
 - **Missing means zero only where the measurement says so.** Whether an absent measurement reads as
   zero is decided per measurement, not per payload. A violation count can say so, because a clean
   file really has zero. A total, such as the number of tests, cannot, because a missing total means
-  nothing was measured. This needs a per-measurement declaration in Diffra (an open question for
-  Diffra); until it exists, the action reports a file cleaned to zero as "cleaned".
+  nothing was measured. This needs a per-measurement declaration in Diffra, requested in
+  [Diffra issue 150](https://github.com/rtkelly-labs/Diffra/issues/150); until it exists, the
+  action reports a file cleaned to zero as "cleaned".
 - **Paths are keys.** File paths are object keys under `files`. Diffra addresses them by JSON
   Pointer, which escapes `/` as `~1`; the producer writes the plain path.
 - **Methodology changes are breaking.** Changing what a rule counts bumps the methodology version,

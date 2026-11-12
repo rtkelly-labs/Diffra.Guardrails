@@ -121,8 +121,10 @@ toolchain install would cost more minutes than the check.
   counts rose; each exemption added in the pull request with its reason.
 - **Diffra payload.** The three payloads from [docs/adapters.md](adapters.md#the-diffra-metrics-payload)
   are uploaded as one artifact on every run. A run on `main` is the trusted baseline for later pull
-  requests. `diffra collect --commit` gets the pull request's head SHA, not `github.sha`, which on
-  `pull_request` events is a synthetic merge commit.
+  requests. `diffra collect` runs once per payload, with `--type-version 1.0` and `--type-id` set
+  to `diffra.guardrails.test-structure`, `diffra.guardrails.test-structure-score` or
+  `diffra.guardrails.test-structure-totals`. `--commit` gets the pull request's head SHA, not
+  `github.sha`, which on `pull_request` events is a synthetic merge commit.
 - **Baseline provenance.** The baseline is the payload artifact from the trusted `main` run at the
   merge-base commit, never a file the pull request supplies. If that artifact has expired, the
   action regenerates the payload at the merge-base in a worktree when that is cheap (Python and
@@ -229,7 +231,7 @@ measurement in a Delta, so different budgets need different files.
   `needs-review`. Cleaning a file is a good change, so the action reports that case as "cleaned"
   rather than as a problem. Whether a missing measurement can be read as zero is decided per
   measurement: yes for violation counts, no for totals. A per-measurement declaration in Diffra
-  would remove the cost.
+  ([Diffra issue 150](https://github.com/rtkelly-labs/Diffra/issues/150)) would remove the cost.
 
 ### Day one, with no friction
 

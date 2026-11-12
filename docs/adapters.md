@@ -87,8 +87,8 @@ a reason. Every exemption is counted per rule as evidence.
 | F# | The FSharp.Analyzers.SDK suppression comment, with a reason |
 
 An exemption without a reason is an error from the adapter, never a counted exemption. (If it needs
-its own rule ID later, it gets a new number in the 1xx range.) File-wide or project-wide suppression of a gated rule is rejected by
-the CI action.
+its own rule ID later, it gets a new number in the 1xx range.) File-wide or project-wide
+suppression of a gated rule is rejected by the CI action.
 
 ## What an adapter emits
 
@@ -124,6 +124,34 @@ GitHub annotations or a job summary.
 - The Roslyn and ESLint adapters already produce diagnostics in their own formats. They map to this
   shape in the wrapper, not inside the analyzer, so the analyzers stay ordinary IDE citizens.
 
+### Finding text
+
+`message` and `fix` are a public contract: agents and their instructions quote them. This table is
+the first version. `{n}` and similar are the only substitutions, the text is held in one place in
+the implementation, and the [conformance corpus](../conformance/README.md) pins each `fix`. A
+change to this table is deliberate and is called out in its pull request.
+
+| Rule | `message` | `fix` |
+| --- | --- | --- |
+| DFG101 | This test has no Arrange/Act/Assert or Given/When/Then markers. | Add Arrange, Act and Assert markers (or Given, When and Then). |
+| DFG102 (spelling) | The marker `{found}` should be written `{marker}`. | Change the comment to exactly `{marker}`. |
+| DFG102 (order) | The marker `{marker}` is out of order: it follows `{previous}`. | Reorder the blocks to Arrange, Act, Assert (or Given, When, Then). |
+| DFG102 (mixed) | This test mixes Arrange/Act/Assert and Given/When/Then markers. | Use one set of markers in each test. |
+| DFG103 (statements) | This Act block has {n} statements; a {size} test acts once. | Move setup into Arrange, or split this test in two. |
+| DFG103 (pairs) | This test has {n} When/Then pairs; a {size} test allows {max}. | Split this test, or declare a larger size if it really crosses I/O. |
+| DFG103 (no Then) | This {block} block is not followed by an {expected} block. | Add an {expected} block that checks what this {block} did. |
+| DFG104 | This assertion is in the {block} block. | Move this assertion under `{expected}`. |
+| DFG105 | This {block} block has {n} assertions; a Then checks one thing. | Split this test in two, one per behaviour, or compare both values in one assertion. |
+| DFG106 (error) | This assertion has no failure message. | Add a message that says what behaviour this assertion protects. |
+| DFG106 (warning) | This assertion API has no place for a failure message. | Use an assertion form that takes a message, or wrap this check in a registered helper that does. |
+| DFG107 | This failure message {reason}. | Say what behaviour broke, not what the values were. |
+| DFG108 (loop) | This test has a loop. | Replace the loop with a data-driven test: one case per input. |
+| DFG108 (if, switch) | This test has a branch. | Split this test so each branch is its own test. |
+| DFG108 (try) | This test catches exceptions itself. | Use the Act & Assert form to check the exception. |
+
+DFG107 `{reason}` is one of: `restates the assertion`, `contains the expected value`,
+`is a generic phrase`, `is under three words`.
+
 ### The Diffra metrics payload
 
 Each adapter (or the wrapper on its behalf) writes Diffra's published metrics payload,
@@ -131,11 +159,17 @@ Each adapter (or the wrapper on its behalf) writes Diffra's published metrics pa
 set of thresholds to every measurement in a payload, metrics with different budgets go in different
 payloads:
 
-| Payload | `methodology` | Metrics | Evaluated |
-| --- | --- | --- | --- |
-| Structure | `test-structure-v1` | Per file, per rule: DFG101–DFG106 and DFG108 error counts | Yes, fail on any absolute increase |
-| Score | `test-structure-score-v1` | Per file: DFG107 count, DFG106 warnings, exemptions per rule | Yes, warn on any absolute increase |
-| Totals | `test-structure-totals-v1` | Tests, assertions, assertions with a message, by size | No; reported beside the Delta only |
+| Payload | Evidence type ID | `methodology` | Metrics | Evaluated |
+| --- | --- | --- | --- | --- |
+| Structure | `diffra.guardrails.test-structure` | `test-structure-v1` | Per file, per rule: DFG101–DFG106 and DFG108 error counts | Yes, fail on any absolute increase |
+| Score | `diffra.guardrails.test-structure-score` | `test-structure-score-v1` | Per file: DFG107 count, DFG106 warnings, exemptions per rule | Yes, warn on any absolute increase |
+| Totals | `diffra.guardrails.test-structure-totals` | `test-structure-totals-v1` | Tests, assertions, assertions with a message, by size | No; reported beside the Delta only |
+
+The evidence type ID is what `diffra collect` takes as `--type-id`, with `--type-version 1.0`. It
+names what the evidence means and is not part of the payload file. Each payload becomes its own
+Evidence document, and Diffra compares two documents only when their type ID and version match.
+The two evaluated types share their names with the rules files that budget them (see
+[baseline and ratchet](interventions.md#5-baseline-and-ratchet)).
 
 ```json
 {
@@ -162,8 +196,9 @@ Rules for the payload:
 - **Missing means zero only where the measurement says so.** Whether an absent measurement reads as
   zero is decided per measurement, not per payload. A violation count can say so, because a clean
   file really has zero. A total, such as the number of tests, cannot, because a missing total means
-  nothing was measured. This needs a per-measurement declaration in Diffra (an open question for
-  Diffra); until it exists, the action reports a file cleaned to zero as "cleaned".
+  nothing was measured. This needs a per-measurement declaration in Diffra, requested in
+  [Diffra issue 150](https://github.com/rtkelly-labs/Diffra/issues/150); until it exists, the
+  action reports a file cleaned to zero as "cleaned".
 - **Paths are keys.** File paths are object keys under `files`. Diffra addresses them by JSON
   Pointer, which escapes `/` as `~1`; the producer writes the plain path.
 - **Methodology changes are breaking.** Changing what a rule counts bumps the methodology version,

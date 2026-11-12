@@ -4,6 +4,11 @@ Status: proposal, 12 November 2026. No checks, assertion APIs, runner integratio
 formats on this page are implemented. [Review cases](../conformance/proposals/obligations.md)
 state the intended positive and negative behaviour without reserving rule IDs.
 
+An [isolated runner experiment](obligation-experiment.md) now evaluates hooks in pytest-bdd,
+Behave, Cucumber-JS/TypeScript and Reqnroll, with an ordinary pytest control. Its synthetic
+fixtures are executable; the reusable checks and production integrations on this page remain
+proposals.
+
 ## Recommendation and fit
 
 Clarity of what is being tested is the acceptance criterion. Require a visible functional outcome

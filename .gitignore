@@ -2,3 +2,14 @@ temp/
 TODO.md
 node_modules/
 .DS_Store
+
+# .NET build artifacts
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.idea/
+.vs/
+TestResults/

@@ -1,0 +1,23 @@
+{
+  "case": "037-contract-mutable-collection",
+  "summary": "A contract property declares a mutable List<string> collection instead of an immutable or read-only collection.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_contract_reads_members",
+    "csharp": "TeamContractTests.Contract_reads_members",
+    "typescript": "contract reads members"
+  },
+  "findings": [
+    {
+      "rule": "DFG303",
+      "block": null,
+      "line": { "python": 7, "csharp": 7, "typescript": 5 },
+      "fix": "Replace 'List<string>' with 'IReadOnlyList<T>', 'IReadOnlyDictionary<K, V>', or 'ImmutableArray<T>'."
+    }
+  ]
+}

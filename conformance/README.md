@@ -58,6 +58,42 @@ adapter must apply them the same way.
 | 001-marked-small-test | The target shape: markers, one Act statement, one assertion with a message | none |
 | 002-two-assertions-without-messages | Assertion Roulette: two checks in one Assert, no messages | DFG105, DFG106 ×2 |
 | 003-unmarked-test-with-a-loop | No markers; a loop where a data-driven test belongs | DFG101, DFG108 |
+| 004-property-getter-with-linq | Property getter with LINQ query and collection allocation | DFG201 |
+| 005-collection-add-mutation | In-place collection mutation instead of functional transformation | DFG202 |
+| 006-broad-exception-swallowed | Catch-all exception swallowing without filter or rethrow | DFG203 |
+| 007-non-static-pure-lambda | Non-static lambda capturing no outer variables | DFG204 |
+| 008-mutable-variable-if-reassignment | Mutable variable reassigned across conditional branches | DFG205 |
+| 009-property-getter-with-control-flow | Property getter with loop and multi-statement computation | DFG201 |
+| 010-collection-remove-mutation | In-place collection mutation with Remove | DFG202 |
+| 011-clean-functional-pipeline | Pure functional test obeying all structural and functional rules | none |
+| 012-capturing-lambda-allowed | Lambda capturing outer threshold (no false positive) | none |
+| 013-filtered-exception-allowed | Catch with explicit exception filter (no false positive) | none |
+| 014-property-getter-allocation | Property getter allocating a new array on every access | DFG201 |
+| 015-property-getter-switch-statement | Property getter executing procedural switch statement | DFG201 |
+| 016-clean-computed-property | Clean computed property with simple arithmetic (no false positive) | none |
+| 017-collection-clear-mutation | In-place collection mutation with Clear | DFG202 |
+| 018-clean-collection-expression | Pure collection expression combining arrays (no false positive) | none |
+| 019-bare-catch-all | Bare catch-all block swallowing faults | DFG203 |
+| 020-clean-rethrow-exception | Catch with bare throw rethrow (no false positive) | none |
+| 021-non-static-local-function | Non-static local function capturing no state | DFG204 |
+| 022-clean-static-lambda | Static lambda guaranteeing zero closure allocation (no false positive) | none |
+| 023-mutable-variable-switch-reassignment | Mutable variable reassigned across switch statement | DFG205 |
+| 024-clean-switch-expression | Single assignment via switch expression (no false positive) | none |
+| 025-misspelt-marker-order | Marker misspelt as Arange | DFG102 |
+| 026-act-budget-exceeded | Act block in small test contains two statements | DFG103 |
+| 027-assertion-in-act-block | Assertion placed inside Act block | DFG104 |
+| 028-property-getter-new-collection | Property getter instantiating new List | DFG201 |
+| 029-collection-sort-mutation | In-place collection mutation via Sort | DFG202 |
+| 030-scoped-builder-allowed | Scoped builder producing immutable collection (no false positive) | none |
+| 031-rethrow-losing-stack-trace | Rethrow using explicit identifier throw ex | DFG203 |
+| 032-lambda-capturing-this-allowed | Lambda capturing instance state this (no false positive) | none |
+| 033-clean-early-return | Early return flow avoiding mutable reassignment (no false positive) | none |
+| 034-contract-with-method | Contract type declares method instead of domain function | DFG301 |
+| 035-contract-property-with-getter-body | Contract property declares computed getter body | DFG302 |
+| 036-contract-mutable-setter | Contract property declares mutable setter `set;` | DFG303 |
+| 037-contract-mutable-collection | Contract property declares mutable `List<T>` collection | DFG303 |
+| 038-contract-disallowed-class | Contract boundary declares mutable class instead of record | DFG304 |
+| 039-clean-pure-contract | Pure immutable contract record with read-only collection (no false positive) | none |
 
 ## Adding a case
 

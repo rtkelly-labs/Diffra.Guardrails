@@ -1,0 +1,23 @@
+{
+  "case": "034-contract-with-method",
+  "summary": "A pure contract type in a contract namespace declares a method instead of segregating behavior into a domain function.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_contract_calculates_total",
+    "csharp": "OrderContractTests.Contract_calculates_total",
+    "typescript": "contract calculates total"
+  },
+  "findings": [
+    {
+      "rule": "DFG301",
+      "block": null,
+      "line": { "python": 8, "csharp": 8, "typescript": 6 },
+      "fix": "Move 'CalculateTotal' to a standalone domain function or extension method."
+    }
+  ]
+}

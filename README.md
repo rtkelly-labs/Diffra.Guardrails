@@ -11,8 +11,8 @@ quietly get worse.
 Status: design. Nothing is built in this repository yet.
 
 - [VISION.md](VISION.md): what this is, the rules, and why.
-- [docs/interventions.md](docs/interventions.md): templates, agent hooks, CI, wrappers, the
-  ratchet, and how to tell whether any of it helps.
-- [docs/adapters.md](docs/adapters.md): what a language adapter must do, and which existing linter
-  rules it reuses.
-- [conformance/](conformance/README.md): the cases every adapter must agree on.
+- [docs/](docs/README.md): documentation index organized by language and tool with progressive disclosure.
+- [docs/rules/](docs/rules/README.md): test structure (DFG1xx), functional architecture (DFG2xx), and contract purity (DFG3xx) rule specifications.
+- [docs/csharp/](docs/csharp/README.md): C# Roslyn analyzer, functional guidance, and performance tuning.
+- [docs/tool/](docs/tool/README.md): CLI runner, agent hooks, CI ratchet, and Diffra payloads.
+- [conformance/](conformance/README.md): the 39 conformance cases every adapter must agree on.

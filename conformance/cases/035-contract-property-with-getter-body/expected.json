@@ -1,0 +1,23 @@
+{
+  "case": "035-contract-property-with-getter-body",
+  "summary": "A contract property declares a computed getter body instead of an auto-property.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_contract_formats_full_name",
+    "csharp": "CustomerContractTests.Contract_formats_full_name",
+    "typescript": "contract formats full name"
+  },
+  "findings": [
+    {
+      "rule": "DFG302",
+      "block": null,
+      "line": { "python": 9, "csharp": 8, "typescript": 6 },
+      "fix": "Convert 'FullName' to an auto-property, or move computation to a domain function."
+    }
+  ]
+}

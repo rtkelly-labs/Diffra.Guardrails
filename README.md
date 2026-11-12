@@ -16,3 +16,5 @@ Status: design. Nothing is built in this repository yet.
 - [docs/adapters.md](docs/adapters.md): what a language adapter must do, and which existing linter
   rules it reuses.
 - [conformance/](conformance/README.md): the cases every adapter must agree on.
+- [docs/obligations.md](docs/obligations.md): proposed functional and engineering obligations,
+  optional BDD overlays and the boundary between lint and runtime evidence; no checks implemented.

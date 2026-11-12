@@ -8,7 +8,7 @@ assertion says why it matters. Each language's checker reports findings an agent
 counts them as [Diffra](https://github.com/rtkelly-labs/Diffra) evidence so test quality cannot
 quietly get worse.
 
-Status: design. Nothing is built in this repository yet.
+Status: design, with an isolated runner-hook experiment. No production checker is built yet.
 
 - [VISION.md](VISION.md): what this is, the rules, and why.
 - [docs/interventions.md](docs/interventions.md): templates, agent hooks, CI, wrappers, the
@@ -16,3 +16,7 @@ Status: design. Nothing is built in this repository yet.
 - [docs/adapters.md](docs/adapters.md): what a language adapter must do, and which existing linter
   rules it reuses.
 - [conformance/](conformance/README.md): the cases every adapter must agree on.
+- [docs/obligations.md](docs/obligations.md): proposed functional and engineering obligations,
+  optional BDD overlays and the boundary between lint and runtime evidence; no checks implemented.
+- [docs/obligation-experiment.md](docs/obligation-experiment.md): runner/tooling evaluation and an
+  executable, isolated hook experiment across Python, TypeScript and Reqnroll.

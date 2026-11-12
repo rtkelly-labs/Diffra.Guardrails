@@ -1,0 +1,12 @@
+[
+  { "case": "good", "functional": "pass", "policy": "pass" },
+  { "case": "missing-functional", "functional": "missing-evidence", "policy": "pass" },
+  { "case": "missing-policy", "functional": "pass", "policy": "missing-evidence" },
+  { "case": "misclassified", "functional": "pass", "policy": "missing-evidence" },
+  { "case": "unreachable", "functional": "pass", "policy": "missing-evidence" },
+  { "case": "no-observer", "functional": "pass", "policy": "missing-evidence" },
+  { "case": "over-budget", "functional": "pass", "policy": "fail" },
+  { "case": "functional-fail", "functional": "fail", "policy": "missing-evidence" },
+  { "case": "setup-fail", "functional": "missing-evidence", "policy": "missing-evidence" },
+  { "case": "zero", "functional": "pass", "policy": "pass" }
+]

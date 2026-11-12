@@ -1,0 +1,5 @@
+{
+  "formatters": {
+    "message": { "outputFilePath": "messages.ndjson" }
+  }
+}

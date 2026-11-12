@@ -210,3 +210,24 @@ A language is supported when:
 2. it emits the finding JSON and the three payloads above;
 3. its exemption form is documented in this page and counted;
 4. it has a recommended configuration for the complementary rules in the table.
+
+## Proposed obligation bindings (not implemented)
+
+The [obligation proposal](obligations.md) adds no requirements to today's six-question contract.
+Future binding support must normalise scenario/condition metadata and resolve registered assertion
+identities to exact obligation IDs. Syntax-only name matching cannot certify typed coverage.
+The following are integration candidates, not accepted configuration or API syntax:
+
+| Adapter | Declaration source to evaluate | Binding resolution needed |
+| --- | --- | --- |
+| Python | Registered pytest markers, fixture metadata or explicit configuration | Resolve imported helper identity and fixture-provided bindings; ambiguous dynamic lookup is unsupported |
+| C# | xUnit traits, NUnit metadata or explicit fixture/configuration metadata | Semantic symbols or trusted runner registry; the planned syntax-only adapter cannot certify types |
+| TypeScript | Runner metadata, fixtures or explicit configuration | Resolved module exports/types or trusted runner registry; aliases need identity resolution |
+| F# | Test/fixture metadata or explicit configuration | Resolved helper identity and runner registration; syntax support requires separate cases |
+| Gherkin (optional front end) | Tags and requirement references plus explicit catalogue/configuration | Runner step registry, inherited tags, Background, Outline row identity and conditional-hook bindings |
+
+For every supported form, corpus cases must cover aliases, unresolved/ambiguous bindings, empty or
+pending steps, inherited metadata and multiple data rows. Document precedence before accepting
+contradictory declarations. An unsupported form must be visible in discovery, not treated as a
+success. Runtime reporters must separately attribute executed assertions to invocation evidence;
+no static adapter can establish that a binding ran.

@@ -1,0 +1,8 @@
+{
+  "allowed-tags": ["on", { "tags": ["@remote_io", "@requirement_read_rows"] }],
+  "no-unnamed-features": "on",
+  "no-unnamed-scenarios": "on",
+  "no-unused-variables": "on",
+  "keywords-in-logical-order": "on",
+  "only-one-when": "on"
+}

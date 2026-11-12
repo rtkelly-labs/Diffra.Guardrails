@@ -165,8 +165,16 @@ public static class CSharpChecker
             return;
 
         var receiver = memberAccess.Expression.ToString();
-        if (receiver.Contains("builder") || receiver.Contains("Builder"))
-            return; // Scoped builder allowed
+        if (receiver.Contains("builder", StringComparison.OrdinalIgnoreCase) ||
+            receiver.Contains("Builder", StringComparison.Ordinal) ||
+            receiver.Contains("immutable", StringComparison.OrdinalIgnoreCase) ||
+            receiver.Contains("Immutable", StringComparison.Ordinal))
+            return; // Scoped builder or immutable transformation allowed
+
+        // If the invocation return value is consumed (assigned, returned, or passed as argument),
+        // it is an immutable transformation rather than an in-place mutation statement.
+        if (inv.Parent is not ExpressionStatementSyntax)
+            return;
 
         var line = inv.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
         var block = DetermineBlock(inv);
@@ -252,7 +260,13 @@ public static class CSharpChecker
                 .Select(static v => v.Identifier.ValueText)
                 .ToHashSet();
 
-            // If lambda references a local var declared outside, it captures outer state!
+            // Include enclosing method parameters as outer state
+            foreach (var param in enclosingMethod.ParameterList.Parameters)
+            {
+                localVars.Add(param.Identifier.ValueText);
+            }
+
+            // If lambda references a local var or parameter declared outside, it captures outer state!
             if (identifiers.Any(id => localVars.Contains(id))) return;
 
             // If lambda references an instance field (like _discountRate)
@@ -520,16 +534,53 @@ public static class CSharpChecker
         var invs = statement.DescendantNodes().OfType<InvocationExpressionSyntax>();
         foreach (var inv in invs)
         {
-            var methodName = inv.Expression is MemberAccessExpressionSyntax m ? m.Name.Identifier.ValueText : "";
-            if (methodName is "BeTrue" or "BeFalse")
+            if (inv.Expression is MemberAccessExpressionSyntax memberAccess)
             {
-                if (inv.ArgumentList.Arguments.Count >= 1) return true;
-            }
-            if (inv.ArgumentList.Arguments.Count > 1)
-            {
-                var secondArg = inv.ArgumentList.Arguments[1].Expression;
-                if (secondArg is LiteralExpressionSyntax { Token.ValueText.Length: > 0 })
-                    return true;
+                var methodName = memberAccess.Name.Identifier.ValueText;
+                var receiver = memberAccess.Expression.ToString();
+
+                // 1. FluentAssertions: .Should().*
+                if (receiver.Contains(".Should()") || receiver.EndsWith("Should()"))
+                {
+                    // Single-value assertions: .BeTrue("msg"), .BeFalse("msg"), .BeNull("msg"), .NotBeNull("msg")
+                    if (methodName is "BeTrue" or "BeFalse" or "BeNull" or "NotBeNull")
+                    {
+                        if (inv.ArgumentList.Arguments.Count >= 1 &&
+                            inv.ArgumentList.Arguments[0].Expression is LiteralExpressionSyntax { Token.ValueText.Length: > 0 })
+                        {
+                            return true;
+                        }
+                    }
+                    // Comparison assertions: .Be(expected, "because ..."), .Equal(expected, "because ...")
+                    else if (inv.ArgumentList.Arguments.Count > 1)
+                    {
+                        var becauseArg = inv.ArgumentList.Arguments[1].Expression;
+                        if (becauseArg is LiteralExpressionSyntax { Token.ValueText.Length: > 0 })
+                        {
+                            return true;
+                        }
+                    }
+                }
+                // 2. Standard xUnit / NUnit Assert static invocations
+                else if (receiver is "Assert")
+                {
+                    if (methodName is "True" or "False")
+                    {
+                        if (inv.ArgumentList.Arguments.Count >= 2 &&
+                            inv.ArgumentList.Arguments[1].Expression is LiteralExpressionSyntax { Token.ValueText.Length: > 0 })
+                        {
+                            return true;
+                        }
+                    }
+                    else if (methodName is "Equal" or "NotEqual" or "Same" or "NotSame")
+                    {
+                        if (inv.ArgumentList.Arguments.Count >= 3 &&
+                            inv.ArgumentList.Arguments[2].Expression is LiteralExpressionSyntax { Token.ValueText.Length: > 0 })
+                        {
+                            return true;
+                        }
+                    }
+                }
             }
         }
         return false;

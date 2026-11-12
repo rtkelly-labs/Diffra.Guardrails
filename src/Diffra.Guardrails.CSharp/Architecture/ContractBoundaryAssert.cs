@@ -117,8 +117,22 @@ public static class ContractBoundaryAssert
         }
     }
 
-    private static bool IsRecord(Type type) =>
-        type.GetMethod("<Clone>$", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) != null;
+    private static bool IsRecord(Type type)
+    {
+        // Record classes synthesize <Clone>$
+        if (type.GetMethod("<Clone>$", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) != null)
+        {
+            return true;
+        }
+
+        // Both record classes and record structs synthesize PrintMembers
+        if (type.GetMethod("PrintMembers", BindingFlags.NonPublic | BindingFlags.Instance) != null)
+        {
+            return true;
+        }
+
+        return false;
+    }
 
     private static bool IsCompilerGenerated(MemberInfo member) =>
         member.GetCustomAttribute<CompilerGeneratedAttribute>() != null || member.Name.StartsWith('<');

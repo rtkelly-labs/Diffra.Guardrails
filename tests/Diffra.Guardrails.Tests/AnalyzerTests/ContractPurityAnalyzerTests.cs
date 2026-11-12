@@ -309,6 +309,12 @@ public class ContractPurityAnalyzerTests
     {
         ContractBoundaryAssert.AssertTypes(new[] { typeof(SamplePureContract) });
     }
+
+    [Fact]
+    public void ContractBoundaryAssert_passes_for_pure_record_struct()
+    {
+        ContractBoundaryAssert.AssertTypes(new[] { typeof(SamplePureRecordStruct) });
+    }
 }
 
 // Sample types for ContractBoundaryAssert reflection testing
@@ -320,3 +326,5 @@ public class SampleViolatingContract
 }
 
 public record SamplePureContract(int Id, string Sku, System.Collections.Generic.IReadOnlyList<string> Tags);
+
+public readonly record struct SamplePureRecordStruct(int Value);

@@ -1,8 +1,8 @@
 # Plan: the first buildable slice
 
-Status: proposal, 6 November 2026. Stacks on PR #1 (`rtkelly13/foundation`), which holds the
-design this plan builds from. Read [VISION.md](VISION.md), [docs/adapters.md](docs/adapters.md) and
-[conformance/README.md](conformance/README.md) before starting.
+Status: proposal, 6 November 2026. This plan builds from the design in [VISION.md](VISION.md),
+[docs/adapters.md](docs/adapters.md) and [conformance/README.md](conformance/README.md). Read them
+before starting.
 
 ## Goal
 
@@ -83,29 +83,10 @@ and hands Core a list of tests, statements, assertions and comments with line nu
 
 ### Finding text
 
-`message` and `fix` are a public contract (AGENTS.md). This table is the first version. It lives
-in one place in Core, `{n}` and similar are the only substitutions, and the corpus pins each `fix`.
-
-| Rule | `message` | `fix` |
-| --- | --- | --- |
-| DFG101 | This test has no Arrange/Act/Assert or Given/When/Then markers. | Add Arrange, Act and Assert markers (or Given, When and Then). |
-| DFG102 (spelling) | The marker `{found}` should be written `{marker}`. | Change the comment to exactly `{marker}`. |
-| DFG102 (order) | The marker `{marker}` is out of order: it follows `{previous}`. | Reorder the blocks to Arrange, Act, Assert (or Given, When, Then). |
-| DFG102 (mixed) | This test mixes Arrange/Act/Assert and Given/When/Then markers. | Use one set of markers in each test. |
-| DFG103 (statements) | This Act block has {n} statements; a {size} test acts once. | Move setup into Arrange, or split this test in two. |
-| DFG103 (pairs) | This test has {n} When/Then pairs; a {size} test allows {max}. | Split this test, or declare a larger size if it really crosses I/O. |
-| DFG103 (no Then) | This {block} block is not followed by an {expected} block. | Add an {expected} block that checks what this {block} did. |
-| DFG104 | This assertion is in the {block} block. | Move this assertion under `{expected}`. |
-| DFG105 | This {block} block has {n} assertions; a Then checks one thing. | Split this test in two, one per behaviour, or compare both values in one assertion. |
-| DFG106 (error) | This assertion has no failure message. | Add a message that says what behaviour this assertion protects. |
-| DFG106 (warning) | This assertion API has no place for a failure message. | Use an assertion form that takes a message, or wrap this check in a registered helper that does. |
-| DFG107 | This failure message {reason}. | Say what behaviour broke, not what the values were. |
-| DFG108 (loop) | This test has a loop. | Replace the loop with a data-driven test: one case per input. |
-| DFG108 (if, switch) | This test has a branch. | Split this test so each branch is its own test. |
-| DFG108 (try) | This test catches exceptions itself. | Use the Act & Assert form to check the exception. |
-
-DFG107 `{reason}` is one of: `restates the assertion`, `contains the expected value`,
-`is a generic phrase`, `is under three words`.
+`message` and `fix` are a public contract (AGENTS.md). The table of every rule's text is in
+[docs/adapters.md](docs/adapters.md#finding-text), and that page is its only home in the docs. In
+code it lives in one place in Core, `{n}` and similar are the only substitutions, and the corpus
+pins each `fix`.
 
 ### Rule details the design leaves open
 
@@ -209,15 +190,17 @@ Update the README's case table and the schema change above.
 | 019-medium-test-three-when-then-pairs | A declared medium test over budget | DFG103 |
 | 020-if-in-a-test | A branch on the result | DFG108 |
 
-Together these pin every `fix` variant in the finding text table.
+Together these pin every `fix` variant in the
+[finding text table](docs/adapters.md#finding-text).
 
 **Done when** every `expected.json` validates against the schema (a theory in the test project
 checks this), the JSON step in CI passes, and the README table lists every case.
 
 ### Phase 2: Core
 
-The finding model and its JSON, the rule catalogue (the finding text table above, nowhere else),
-the language-neutral block model and rule evaluation, and the payload writer. Unit tests drive the
+The finding model and its JSON, the rule catalogue (the
+[finding text table](docs/adapters.md#finding-text), in one place in code and nowhere else), the
+language-neutral block model and rule evaluation, and the payload writer. Unit tests drive the
 block model from hand-built inputs, with no parser involved.
 
 **Done when** unit tests cover each rule's positive and negative case through the block model, and
@@ -278,17 +261,14 @@ rules; fix any that do not.
 Stop and ask the user, rather than guess, when:
 
 - a case needs a rule decision not pinned in this plan or by an existing case;
-- the finding text table needs to change;
+- the [finding text table](docs/adapters.md#finding-text) needs to change;
 - a dependency beyond those listed is needed;
 - anything would publish, release, or push to `main`.
 
 ## Open items for the user
 
-- PR #1 is still a draft. This plan stacks on it; land it first, or retarget this branch.
-- The main checkout has an uncommitted `AGENTS.md` and `.ls-lint.yml` that differ from the
-  `AGENTS.md` in PR #1. Reconcile them before an agent reads the wrong one.
-- Review the finding text table and the rule details above. They become a public contract when
-  phase 2 lands.
+- Review the [finding text table](docs/adapters.md#finding-text) and the rule details above. They
+  become a public contract when phase 2 lands.
 - Confirm C# before Python (see [Why this slice](#why-this-slice)).
 
 ## Kick-off prompt

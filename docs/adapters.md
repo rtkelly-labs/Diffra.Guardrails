@@ -87,8 +87,8 @@ a reason. Every exemption is counted per rule as evidence.
 | F# | The FSharp.Analyzers.SDK suppression comment, with a reason |
 
 An exemption without a reason is an error from the adapter, never a counted exemption. (If it needs
-its own rule ID later, it gets a new number in the 1xx range.) File-wide or project-wide suppression of a gated rule is rejected by
-the CI action.
+its own rule ID later, it gets a new number in the 1xx range.) File-wide or project-wide
+suppression of a gated rule is rejected by the CI action.
 
 ## What an adapter emits
 
@@ -123,6 +123,34 @@ GitHub annotations or a job summary.
   instructions can quote them.
 - The Roslyn and ESLint adapters already produce diagnostics in their own formats. They map to this
   shape in the wrapper, not inside the analyzer, so the analyzers stay ordinary IDE citizens.
+
+### Finding text
+
+`message` and `fix` are a public contract: agents and their instructions quote them. This table is
+the first version. `{n}` and similar are the only substitutions, the text is held in one place in
+the implementation, and the [conformance corpus](../conformance/README.md) pins each `fix`. A
+change to this table is deliberate and is called out in its pull request.
+
+| Rule | `message` | `fix` |
+| --- | --- | --- |
+| DFG101 | This test has no Arrange/Act/Assert or Given/When/Then markers. | Add Arrange, Act and Assert markers (or Given, When and Then). |
+| DFG102 (spelling) | The marker `{found}` should be written `{marker}`. | Change the comment to exactly `{marker}`. |
+| DFG102 (order) | The marker `{marker}` is out of order: it follows `{previous}`. | Reorder the blocks to Arrange, Act, Assert (or Given, When, Then). |
+| DFG102 (mixed) | This test mixes Arrange/Act/Assert and Given/When/Then markers. | Use one set of markers in each test. |
+| DFG103 (statements) | This Act block has {n} statements; a {size} test acts once. | Move setup into Arrange, or split this test in two. |
+| DFG103 (pairs) | This test has {n} When/Then pairs; a {size} test allows {max}. | Split this test, or declare a larger size if it really crosses I/O. |
+| DFG103 (no Then) | This {block} block is not followed by an {expected} block. | Add an {expected} block that checks what this {block} did. |
+| DFG104 | This assertion is in the {block} block. | Move this assertion under `{expected}`. |
+| DFG105 | This {block} block has {n} assertions; a Then checks one thing. | Split this test in two, one per behaviour, or compare both values in one assertion. |
+| DFG106 (error) | This assertion has no failure message. | Add a message that says what behaviour this assertion protects. |
+| DFG106 (warning) | This assertion API has no place for a failure message. | Use an assertion form that takes a message, or wrap this check in a registered helper that does. |
+| DFG107 | This failure message {reason}. | Say what behaviour broke, not what the values were. |
+| DFG108 (loop) | This test has a loop. | Replace the loop with a data-driven test: one case per input. |
+| DFG108 (if, switch) | This test has a branch. | Split this test so each branch is its own test. |
+| DFG108 (try) | This test catches exceptions itself. | Use the Act & Assert form to check the exception. |
+
+DFG107 `{reason}` is one of: `restates the assertion`, `contains the expected value`,
+`is a generic phrase`, `is under three words`.
 
 ### The Diffra metrics payload
 

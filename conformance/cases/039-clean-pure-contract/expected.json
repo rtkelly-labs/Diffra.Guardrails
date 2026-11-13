@@ -1,0 +1,16 @@
+{
+  "case": "039-clean-pure-contract",
+  "summary": "A clean pure contract record with immutable init properties and read-only collection obeys all rules with zero findings.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_contract_reads_sku_cleanly",
+    "csharp": "ProductContractTests.Contract_reads_sku_cleanly",
+    "typescript": "contract reads sku cleanly"
+  },
+  "findings": []
+}

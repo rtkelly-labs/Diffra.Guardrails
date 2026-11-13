@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Diffra.Guardrails.Core/Diffra.Guardrails.Core.csproj" />
+  </Folder>
+</Solution>

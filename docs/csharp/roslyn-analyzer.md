@@ -218,3 +218,77 @@ Testing uses the official Roslyn test harness:
 3. **Conformance Corpus Integration:**
    - The test suite executes each analyzer against the C# files in `conformance/cases/` and asserts
      that the reported findings match `expected.json` byte-for-byte.
+
+---
+
+## 7. Multi-Language Boundaries, Framework & Language Version Gating
+
+### 7.1 Cross-Language Boundaries
+
+Roslyn DiagnosticAnalyzers are inherently CLR-language specific. In Roslyn:
+
+- An analyzer declares supported languages via the `[DiagnosticAnalyzer(LanguageNames.CSharp, ...)]` attribute.
+- Roslyn cannot execute across F#, TypeScript, or Python.
+- **Diffra Guardrails Architecture:** Native linters and AST visitors run in each ecosystem (Roslyn for C#, `FSharp.Analyzers.SDK` for F#, ESLint for TypeScript, AST linters for Python), while the Diffra CLI tool (`diffra-guardrails check`) normalizes all diagnostics into the unified `DFG` JSON schema.
+
+### 7.2 Framework Version Gating
+
+An analyzer can gate its execution based on the compilation's target framework using three distinct patterns:
+
+1. **Symbol / Type Probe in `CompilationStartAction` (Recommended):**
+   Probe for types that were introduced in specific framework releases:
+
+   ```csharp
+   context.RegisterCompilationStartAction(compilationContext =>
+   {
+       // Gate on .NET 8+ by verifying TimeProvider exists in metadata
+       var timeProviderSymbol = compilationContext.Compilation.GetTypeByMetadataName("System.TimeProvider");
+       if (timeProviderSymbol is null)
+       {
+           return; // Early exit: do not register DFG403 TimeProvider checks on older frameworks
+       }
+
+       compilationContext.RegisterSyntaxNodeAction(...);
+   });
+   ```
+
+2. **Assembly TargetFrameworkAttribute Inspection:**
+   Read the `TargetFrameworkAttribute` emitted by the compiler into the target assembly:
+
+   ```csharp
+   var targetFramework = compilationContext.Compilation.Assembly.GetAttributes()
+       .FirstOrDefault(a => a.AttributeClass?.Name == "TargetFrameworkAttribute")
+       ?.ConstructorArguments.FirstOrDefault().Value?.ToString();
+   // e.g. ".NETCoreApp,Version=v11.0"
+   ```
+
+3. **MSBuild Package Gating:**
+   In the analyzer's NuGet `.targets` file, conditionally disable specific diagnostics on older target frameworks:
+
+   ```xml
+   <ItemGroup Condition="'$([MSBuild]::VersionLessThan($(TargetFrameworkVersion), 11.0))' == 'true'">
+     <DisabledAnalyzers Include="DFG501" />
+   </ItemGroup>
+   ```
+
+### 7.3 Language Version Gating
+
+In .NET, **Target Framework Version and Language Version are decoupled**:
+
+- A project targeting `.NET 10` may set `<LangVersion>14</LangVersion>` or `<LangVersion>preview</LangVersion>`.
+- A project targeting `.NET 11` may pin `<LangVersion>11</LangVersion>`.
+
+To prevent invalid diagnostics or generating code fixes that fail to compile, analyzers inspect `CSharpParseOptions.LanguageVersion`:
+
+```csharp
+private static void AnalyzeNode(SyntaxNodeAnalysisContext context)
+{
+    var parseOptions = (CSharpParseOptions)context.Node.SyntaxTree.Options;
+    if (parseOptions.LanguageVersion < LanguageVersion.CSharp14)
+    {
+        return; // Do not enforce C# 14 union syntax rules on projects running C# 13 or lower
+    }
+
+    // Proceed with language-version specific analysis
+}
+```

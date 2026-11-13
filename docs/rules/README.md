@@ -41,6 +41,19 @@ flowchart TD
         R304["DFG304: Permitted Declarations Only"]
     end
 
+    subgraph DFG4xx["DFG4xx: Deep Immutability & Type Safety"]
+        direction TB
+        R401["DFG401: Deep Immutability"]
+        R402["DFG402: Mandatory Init Properties"]
+        R403["DFG403: Banned Non-Deterministic APIs"]
+    end
+
+    subgraph DFG5xx["DFG5xx: Algebraic Types & Exhaustive Matching"]
+        direction TB
+        R501["DFG501: Full-Time Exhaustive Matching"]
+        R502["DFG502: Pure Domain Functions"]
+    end
+
     subgraph Bundles["Architectural Style Profiles"]
         B1["Functional Bundle"]
         B2["High-Performance Bundle"]
@@ -50,11 +63,15 @@ flowchart TD
     DFG1xx --> Bundles
     DFG2xx --> Bundles
     DFG3xx --> Bundles
+    DFG4xx --> Bundles
+    DFG5xx --> Bundles
 ```
 
 * **[DFG1xx: Test Structure Rules](dfg1xx-test-structure.md)**: Physical shape of unit and integration tests (markers, act statement budget, assertion roulette, failure messages).
 * **[DFG2xx: Functional Architecture Rules](dfg2xx-functional-architecture.md)**: Clean code and functional discipline (lightweight property accessors, collection immutability, defensive exceptions, static lambdas, single assignment).
 * **[DFG3xx: Contract & Data Purity Rules](dfg3xx-contract-and-data-purity.md)**: Segregation of pure data schemas from behavior, immutability, and boundary scoping.
+* **[DFG4xx: Deep Immutability & Type Safety Rules](dfg4xx-deep-immutability.md)**: Deep immutability in records, mandatory init setters in domain models, and banned non-deterministic APIs (`DateTime.Now`, task blocking).
+* **[DFG5xx: Algebraic Types & Exhaustive Matching](dfg5xx-algebraic-types.md)**: Full-time compile-time exhaustive pattern matching banning discard `_` on closed union types, and pure domain functions.
 * **[Architectural Style Bundles](style-bundles.md)**: Configurable rule profiles balancing pure functional idioms with compiler hot-path performance requirements.
 
 ---

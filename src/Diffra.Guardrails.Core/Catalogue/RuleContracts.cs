@@ -135,4 +135,48 @@ public static class RuleContracts
         public static string Fix(string type) =>
             $"Convert '{type}' to a record or interface, or move non-contract declarations outside the contract boundary.";
     }
+
+    // DFG4xx - Deep Immutability & Type Safety
+    public static class DFG401
+    {
+        public const string Rule = "DFG401";
+        public static string Message(string record, string property, string type) =>
+            $"Record '{record}' has property '{property}' of mutable reference type '{type}'; records must be deeply immutable.";
+        public const string Fix = "Make type an immutable record or value type, or use an immutable collection.";
+    }
+
+    public static class DFG402
+    {
+        public const string Rule = "DFG402";
+        public static string Message(string property, string type) =>
+            $"Property '{property}' in domain type '{type}' declares a mutable setter 'set;'; domain properties must be immutable ('init;' or get-only).";
+        public const string Fix = "Replace 'set;' with 'init;' or remove setter.";
+    }
+
+    public static class DFG403
+    {
+        public const string Rule = "DFG403";
+        public static string Message(string symbol, string reason) =>
+            $"Use of banned symbol '{symbol}': {reason}.";
+        public static string Fix(string alternative) =>
+            $"Use '{alternative}' instead.";
+    }
+
+    // DFG5xx - Algebraic Types & Pattern Matching
+    public static class DFG501
+    {
+        public const string Rule = "DFG501";
+        public static string Message(string type) =>
+            $"Switch expression over closed union type '{type}' uses a wildcard discard '_' which masks unhandled variants; pattern matching must explicitly handle all cases.";
+        public static string Fix(string type) =>
+            $"Remove the wildcard discard and explicitly match all variants of '{type}'.";
+    }
+
+    public static class DFG502
+    {
+        public const string Rule = "DFG502";
+        public static string Message(string method, string type) =>
+            $"Domain method '{method}' in '{type}' is non-static or writes to state; domain operations must be pure static functions.";
+        public const string Fix = "Make method static and return a new state instead of mutating fields.";
+    }
 }

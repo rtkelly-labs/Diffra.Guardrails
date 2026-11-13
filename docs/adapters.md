@@ -171,7 +171,9 @@ Rules for the payload:
 
 ## Reuse or build
 
-Reuse an existing rule wherever it fully covers a DFG rule, enable complementary rules that check
+**Architectural principle:** *Fit natively into each language's ecosystem of tools where viable; avoid forking linting into different ecosystems.*
+
+Reuse an existing native rule wherever it fully covers a DFG rule, enable complementary rules that check
 nearby problems, and build only the gap. Anything that needs the marker block model (which line is
 in which block) is a build in every language, because no existing tool knows about markers beyond
 "is there a comment".

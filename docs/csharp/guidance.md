@@ -2,7 +2,7 @@
 
 This document defines the functional programming conventions enforced by Diffra Guardrails
 through the **DFG2xx** rule family. It provides guidelines and idioms for human engineers and AI
-agents targeting modern .NET (C# 10, 11, 12, and 13+).
+agents targeting modern .NET (C# 10, 11, 12, 13, and 14+ on .NET 10 and .NET 11).
 
 ---
 
@@ -384,7 +384,43 @@ else
 
 ---
 
-## 8. Summary of Diagnostics & Fix Actions
+## 8. Algebraic Union Types and Conditional Compilation (`NET11_0_OR_GREATER`)
+
+With .NET 11 releasing native union types alongside existing sealed record hierarchies, libraries can support both .NET 10 and .NET 11+ using the standard SDK preprocessor symbol `#if NET11_0_OR_GREATER`.
+
+Under rule **DFG501**, pattern matching expressions over algebraic union types must be exhaustive without wildcard fallback arms (`_ => ...`):
+
+```csharp
+#if NET11_0_OR_GREATER
+// Native .NET 11 union types
+public union PaymentMethod { Card(string Number), Cash, Crypto(string Wallet) }
+
+public static decimal CalculateFee(PaymentMethod method) => method switch
+{
+    PaymentMethod.Card c => 0.02m,
+    PaymentMethod.Cash => 0.0m,
+    PaymentMethod.Crypto cr => 0.01m
+    // DFG501 prohibits '_ => 0.0m' so new variants are never silently ignored
+};
+#else
+// .NET 10 sealed record union hierarchy
+public abstract record PaymentMethod;
+public sealed record CardPayment(string Number) : PaymentMethod;
+public sealed record CashPayment : PaymentMethod;
+public sealed record CryptoPayment(string Wallet) : PaymentMethod;
+
+public static decimal CalculateFee(PaymentMethod method) => method switch
+{
+    CardPayment c => 0.02m,
+    CashPayment => 0.0m,
+    CryptoPayment cr => 0.01m
+};
+#endif
+```
+
+---
+
+## 9. Summary of Diagnostics & Fix Actions
 
 | Rule | Finding Diagnostic | Actionable Fix Contract |
 | --- | --- | --- |

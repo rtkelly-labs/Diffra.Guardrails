@@ -80,6 +80,23 @@ flowchart TD
    A composite action providing automated PR annotations, merge gating on changed code, and Diffra
    ratchet telemetry.
 
+### 2.1 Core Principle: Native Ecosystem Integration (Zero Forking)
+
+A foundational architectural invariant of Diffra Guardrails is to **fit natively into the ecosystem of tools where viable, avoiding forking linting into different ecosystems**:
+
+1. **Meet Developers in Their Native Workflow:**
+   - **.NET / C#:** Standard Roslyn `DiagnosticAnalyzer` & `CodeFixProvider` via NuGet. Integrates directly into `dotnet build`, `dotnet format`, Visual Studio, and VS Code C# Dev Kit with zero external processes.
+   - **TypeScript / JS:** Standard ESLint plugin (`eslint-plugin-diffra`) via npm. Integrates directly into `eslint .`, `next lint`, Prettier, and editor extensions.
+   - **Python:** Standard plugin via PyPI integrating directly with `pytest`, `ruff`, or `flake8` using native AST visitors.
+   - **F#:** Standard `FSharp.Analyzers.SDK` package running natively within Ionide, Rider, and compiler tooling.
+
+2. **Reuse Existing Native Diagnostics; Build Only the Gaps:**
+   - Where an ecosystem already possesses robust rules (e.g. `CA1024` and `CA1031` in .NET SDK, `PT012` in pytest, or `@typescript-eslint` rules), Diffra reuses, configures, and maps them to the DFG canonical model rather than rebuilding redundant checks or forking linter engines.
+   - For novel architectural constraints where no upstream tooling exists (such as DFG1xx test shape, DFG3xx contract purity boundaries, DFG4xx deep immutability, and DFG5xx full-time union exhaustiveness), Diffra authors native plugins conforming to the host ecosystem's standard extension points.
+
+3. **Unified Governance & Ratchets:**
+   - While execution remains native and un-forked, Diffra provides the unifying rule contract, cross-language conformance validation, and ratchet metric budgets across the entire software estate.
+
 ---
 
 ## 3. Two Pillars of Guardrails
@@ -112,6 +129,17 @@ flowchart LR
         D302["DFG302: Auto-Properties Only"]
         D303["DFG303: Immutable Collections"]
         D304["DFG304: Permitted Declarations Only"]
+    end
+
+    subgraph Pillar4["Pillar 4: Deep Immutability & Type Safety (DFG4xx)"]
+        D401["DFG401: Deep Immutability in Records"]
+        D402["DFG402: Mandatory Init Domain Properties"]
+        D403["DFG403: Banned Non-Deterministic APIs"]
+    end
+
+    subgraph Pillar5["Pillar 5: Algebraic Types & Exhaustive Matching (DFG5xx)"]
+        D501["DFG501: Full-Time Exhaustive Pattern Matching"]
+        D502["DFG502: Pure Domain Functions"]
     end
 ```
 
@@ -163,6 +191,28 @@ Strictly segregates pure schemas and data objects from behavioral execution pipe
   collection types (`List<T>`) in favor of `IReadOnlyList<T>` and `ImmutableArray<T>`.
 - **DFG304 (Permitted Declaration Kinds):** Types in contract boundaries must be `record class`,
   `record struct`, `enum`, `interface`, or static constants containers.
+
+### Pillar 4: Deep Immutability & Type Safety (`DFG4xx`)
+
+Enforces deep object and collection immutability, immutable domain properties, and eliminates
+uncontrolled runtime side-effects:
+
+- **DFG401 (Deep Immutability in Records):** Records and value types must not reference mutable classes
+  or collections.
+- **DFG402 (Mandatory Init Domain Properties):** Domain types must declare `{ get; init; }` or get-only
+  properties; mutable setters (`set;`) are prohibited.
+- **DFG403 (Banned Non-Deterministic & Blocking APIs):** Prohibits direct system clock reads
+  (`DateTime.Now`/`UtcNow` in favor of `TimeProvider`), thread sleeping (`Thread.Sleep`), and synchronous
+  task blocking (`.Result`/`.Wait()`).
+
+### Pillar 5: Algebraic Types & Exhaustive Matching (`DFG5xx`)
+
+Turns pattern matching exhaustiveness into a full-time compile-time invariant and enforces pure functions:
+
+- **DFG501 (Full-Time Exhaustive Pattern Matching):** Prohibits wildcard discards (`_ => ...`) on closed
+  union hierarchies, enums, and discriminated unions, guaranteeing unhandled variants cause compiler errors.
+- **DFG502 (Pure Domain Functions):** Domain operations must be pure static functions returning new state
+  rather than mutating instance fields.
 
 ---
 

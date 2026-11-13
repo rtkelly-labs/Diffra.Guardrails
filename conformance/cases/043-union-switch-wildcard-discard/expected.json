@@ -1,0 +1,23 @@
+{
+  "case": "043-union-switch-wildcard-discard",
+  "summary": "A switch expression matching over a closed enum/union type uses wildcard discard '_' which masks unhandled variants.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_switch_evaluates_discount_with_discard",
+    "csharp": "OrderStatusTests.Switch_evaluates_discount_with_discard",
+    "typescript": "switch evaluates discount with discard"
+  },
+  "findings": [
+    {
+      "rule": "DFG501",
+      "block": "Act",
+      "line": { "python": 18, "csharp": 24, "typescript": 18 },
+      "fix": "Remove the wildcard discard and explicitly match all variants of 'status'."
+    }
+  ]
+}

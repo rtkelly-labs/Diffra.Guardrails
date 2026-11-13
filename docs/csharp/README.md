@@ -2,7 +2,7 @@
 
 Status: Active. Conforms to [VISION.md](../../VISION.md).
 
-`Diffra.Guardrails.CSharp` provides deterministic Roslyn analyzers, code fixes, and structural guardrails for modern C# (12, 13, and 14) running on .NET 9 and .NET 10.
+`Diffra.Guardrails.CSharp` provides deterministic Roslyn analyzers, code fixes, and structural guardrails for modern C# (12, 13, and 14) running on .NET 10 and .NET 11.
 
 ---
 

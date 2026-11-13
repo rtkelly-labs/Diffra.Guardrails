@@ -37,7 +37,7 @@ Each language adapter and tool has its own dedicated directory designed to expan
 | **TypeScript / JS** | [typescript/README.md](typescript/README.md) | [typescript/tooling-and-plan.md](typescript/tooling-and-plan.md) | [ESLint Plugin & Vitest Plan](typescript/tooling-and-plan.md) |
 | **Python** | [python/README.md](python/README.md) | [python/tooling-and-plan.md](python/tooling-and-plan.md) | [AST/Tokenize & Pytest Plan](python/tooling-and-plan.md) |
 | **CLI Tool** | [tool/README.md](tool/README.md) | [tool/interventions.md](tool/interventions.md) | [CI Ratchet & Metrics Payloads](tool/interventions.md) |
-| **Rule Contracts** | [rules/README.md](rules/README.md) | [DFG1xx: Test Shape](rules/dfg1xx-test-structure.md) &bull; [DFG2xx: Functional](rules/dfg2xx-functional-architecture.md) &bull; [DFG3xx: Contracts](rules/dfg3xx-contract-and-data-purity.md) | [Style Bundles](rules/style-bundles.md) |
+| **Rule Contracts** | [rules/README.md](rules/README.md) | [DFG1xx: Test Shape](rules/dfg1xx-test-structure.md) &bull; [DFG2xx: Functional](rules/dfg2xx-functional-architecture.md) &bull; [DFG3xx: Contracts](rules/dfg3xx-contract-and-data-purity.md) &bull; [DFG4xx: Immutability](rules/dfg4xx-deep-immutability.md) &bull; [DFG5xx: Algebraic Types](rules/dfg5xx-algebraic-types.md) | [Style Bundles](rules/style-bundles.md) |
 | **System Architecture** | [architecture/README.md](architecture/README.md) | [architecture/adapters.md](architecture/adapters.md) &bull; [architecture/dogfooding.md](architecture/dogfooding.md) | [Boundaries](architecture/contract-and-module-boundaries.md) &bull; [Literature](architecture/literature-and-benchmarks.md) &bull; [Upstream](architecture/upstream-inspirations-and-attribution.md) |
 
 ---

@@ -22,6 +22,12 @@ public static class CSharpChecker
         var contractPropertySpans = new List<(int Start, int End)>();
         AnalyzeContractPurity(root, filePath, findings, contractPropertySpans);
 
+        // 0b. Analyze DFG4xx and DFG5xx
+        AnalyzeDeepImmutabilityAndInit(root, filePath, findings, contractPropertySpans);
+        AnalyzeBannedSymbols(root, filePath, findings);
+        AnalyzePatternMatchingAndUnions(root, filePath, findings);
+        AnalyzeDomainFunctions(root, filePath, findings);
+
         // 1. Analyze properties for DFG201
         var propertySpans = new List<(int Start, int End)>();
         foreach (var prop in root.DescendantNodes().OfType<PropertyDeclarationSyntax>())
@@ -857,6 +863,283 @@ public static class CSharpChecker
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+
+    private static void AnalyzeDeepImmutabilityAndInit(
+        CompilationUnitSyntax root,
+        string filePath,
+        List<Finding> findings,
+        List<(int Start, int End)> contractPropertySpans)
+    {
+        var inContractBoundary = IsInContractBoundary(root, filePath);
+
+        var declaredClasses = root.DescendantNodes().OfType<ClassDeclarationSyntax>()
+            .Where(static c => !c.Modifiers.Any(SyntaxKind.StaticKeyword) && !IsTestClass(c))
+            .Select(static c => c.Identifier.ValueText)
+            .ToHashSet();
+
+        // 1. DFG401: Deep Immutability for Records
+        foreach (var record in root.DescendantNodes().OfType<RecordDeclarationSyntax>())
+        {
+            if (IsTestClass(record)) continue;
+            var recordInBoundary = inContractBoundary || IsInContractBoundary(record, filePath);
+            var recordName = record.Identifier.ValueText;
+
+            // Check primary constructor parameters
+            if (record.ParameterList != null)
+            {
+                foreach (var param in record.ParameterList.Parameters)
+                {
+                    if (param.Type != null)
+                    {
+                        var typeStr = param.Type.ToString();
+                        var isMutableRef = declaredClasses.Contains(typeStr) ||
+                                           typeStr.StartsWith("Mutable", StringComparison.Ordinal) ||
+                                           typeStr.EndsWith("Class", StringComparison.Ordinal);
+                        var isMutableCol = IsMutableCollectionType(typeStr);
+
+                        if (isMutableRef || (!recordInBoundary && isMutableCol))
+                        {
+                            var line = param.Identifier.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+                            findings.Add(new Finding(
+                                Rule: RuleContracts.DFG401.Rule,
+                                Path: filePath,
+                                Line: line,
+                                EndLine: line,
+                                Block: null,
+                                Message: RuleContracts.DFG401.Message(recordName, param.Identifier.ValueText, typeStr),
+                                Fix: RuleContracts.DFG401.Fix));
+                        }
+                    }
+                }
+            }
+
+            // Check body properties
+            foreach (var prop in record.Members.OfType<PropertyDeclarationSyntax>())
+            {
+                var typeStr = prop.Type.ToString();
+                var isMutableRef = declaredClasses.Contains(typeStr) ||
+                                   typeStr.StartsWith("Mutable", StringComparison.Ordinal) ||
+                                   typeStr.EndsWith("Class", StringComparison.Ordinal);
+                var isMutableCol = IsMutableCollectionType(typeStr);
+
+                if (isMutableRef || (!recordInBoundary && isMutableCol))
+                {
+                    var line = prop.Identifier.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+                    findings.Add(new Finding(
+                        Rule: RuleContracts.DFG401.Rule,
+                        Path: filePath,
+                        Line: line,
+                        EndLine: line,
+                        Block: null,
+                        Message: RuleContracts.DFG401.Message(recordName, prop.Identifier.ValueText, typeStr),
+                        Fix: RuleContracts.DFG401.Fix));
+                }
+            }
+        }
+
+        // 2. DFG402: Mandatory init; in Domain Types
+        foreach (var prop in root.DescendantNodes().OfType<PropertyDeclarationSyntax>())
+        {
+            if (contractPropertySpans.Any(span => prop.SpanStart >= span.Start && prop.Span.End <= span.End))
+                continue;
+
+            var enclosingType = prop.Ancestors().OfType<BaseTypeDeclarationSyntax>().FirstOrDefault();
+            if (enclosingType == null || IsTestClass(enclosingType)) continue;
+
+            if (inContractBoundary || IsInContractBoundary(enclosingType, filePath)) continue;
+
+            var setter = prop.AccessorList?.Accessors.FirstOrDefault(static a => a.IsKind(SyntaxKind.SetAccessorDeclaration));
+            if (setter != null)
+            {
+                var setterLine = setter.Keyword.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+                var typeName = enclosingType switch
+                {
+                    TypeDeclarationSyntax td => td.Identifier.ValueText,
+                    _ => "Unknown"
+                };
+                findings.Add(new Finding(
+                    Rule: RuleContracts.DFG402.Rule,
+                    Path: filePath,
+                    Line: setterLine,
+                    EndLine: setterLine,
+                    Block: null,
+                    Message: RuleContracts.DFG402.Message(prop.Identifier.ValueText, typeName),
+                    Fix: RuleContracts.DFG402.Fix));
+            }
+        }
+    }
+
+    private static void AnalyzeBannedSymbols(
+        CompilationUnitSyntax root,
+        string filePath,
+        List<Finding> findings)
+    {
+        foreach (var memberAccess in root.DescendantNodes().OfType<MemberAccessExpressionSyntax>())
+        {
+            var text = memberAccess.ToString();
+            if (text is "DateTime.Now" or "DateTime.UtcNow")
+            {
+                var line = memberAccess.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+                findings.Add(new Finding(
+                    Rule: RuleContracts.DFG403.Rule,
+                    Path: filePath,
+                    Line: line,
+                    EndLine: line,
+                    Block: DetermineBlock(memberAccess),
+                    Message: RuleContracts.DFG403.Message(text, "non-deterministic system clock dependency"),
+                    Fix: RuleContracts.DFG403.Fix("TimeProvider.GetUtcNow()")));
+            }
+            else if (text is "Thread.Sleep")
+            {
+                var line = memberAccess.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+                findings.Add(new Finding(
+                    Rule: RuleContracts.DFG403.Rule,
+                    Path: filePath,
+                    Line: line,
+                    EndLine: line,
+                    Block: DetermineBlock(memberAccess),
+                    Message: RuleContracts.DFG403.Message(text, "synchronous thread blocking"),
+                    Fix: RuleContracts.DFG403.Fix("Task.Delay")));
+            }
+            else if (memberAccess.Name.Identifier.ValueText is "Result" && text.EndsWith(".Result", StringComparison.Ordinal) && !text.Contains("Should()"))
+            {
+                var line = memberAccess.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+                findings.Add(new Finding(
+                    Rule: RuleContracts.DFG403.Rule,
+                    Path: filePath,
+                    Line: line,
+                    EndLine: line,
+                    Block: DetermineBlock(memberAccess),
+                    Message: RuleContracts.DFG403.Message(text, "synchronous blocking on task risks deadlock"),
+                    Fix: RuleContracts.DFG403.Fix("await")));
+            }
+            else if (memberAccess.Name.Identifier.ValueText is "Wait" && text.EndsWith(".Wait", StringComparison.Ordinal) && !text.Contains("Should()"))
+            {
+                var line = memberAccess.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+                findings.Add(new Finding(
+                    Rule: RuleContracts.DFG403.Rule,
+                    Path: filePath,
+                    Line: line,
+                    EndLine: line,
+                    Block: DetermineBlock(memberAccess),
+                    Message: RuleContracts.DFG403.Message(text, "synchronous blocking on task risks deadlock"),
+                    Fix: RuleContracts.DFG403.Fix("await")));
+            }
+        }
+
+        foreach (var objCreation in root.DescendantNodes().OfType<ObjectCreationExpressionSyntax>())
+        {
+            var typeName = objCreation.Type.ToString();
+            if (typeName is "ArrayList" or "Hashtable" or "System.Collections.ArrayList" or "System.Collections.Hashtable")
+            {
+                var line = objCreation.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+                findings.Add(new Finding(
+                    Rule: RuleContracts.DFG403.Rule,
+                    Path: filePath,
+                    Line: line,
+                    EndLine: line,
+                    Block: DetermineBlock(objCreation),
+                    Message: RuleContracts.DFG403.Message(typeName, "untyped legacy collection"),
+                    Fix: RuleContracts.DFG403.Fix("ImmutableArray<T> or IReadOnlyList<T>")));
+            }
+        }
+    }
+
+    private static void AnalyzePatternMatchingAndUnions(
+        CompilationUnitSyntax root,
+        string filePath,
+        List<Finding> findings)
+    {
+        foreach (var switchExpr in root.DescendantNodes().OfType<SwitchExpressionSyntax>())
+        {
+            var governingExpr = switchExpr.GoverningExpression.ToString();
+
+            // Detect if this switch expression matches on an algebraic union or enum
+            var hasUnionArm = switchExpr.Arms.Any(static arm => arm.Pattern switch
+            {
+                ConstantPatternSyntax cp => cp.Expression is MemberAccessExpressionSyntax,
+                DeclarationPatternSyntax => true,
+                TypePatternSyntax => true,
+                RecursivePatternSyntax => true,
+                _ => false
+            });
+
+            if (!hasUnionArm) continue;
+
+            // Look for wildcard discard arm: _ => ...
+            foreach (var arm in switchExpr.Arms)
+            {
+                if (arm.Pattern is DiscardPatternSyntax)
+                {
+                    var line = arm.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+                    findings.Add(new Finding(
+                        Rule: RuleContracts.DFG501.Rule,
+                        Path: filePath,
+                        Line: line,
+                        EndLine: line,
+                        Block: DetermineBlock(arm),
+                        Message: RuleContracts.DFG501.Message(governingExpr),
+                        Fix: RuleContracts.DFG501.Fix(governingExpr)));
+                }
+            }
+        }
+    }
+
+    private static void AnalyzeDomainFunctions(
+        CompilationUnitSyntax root,
+        string filePath,
+        List<Finding> findings)
+    {
+        foreach (var classDecl in root.DescendantNodes().OfType<ClassDeclarationSyntax>())
+        {
+            if (IsTestClass(classDecl)) continue;
+
+            var fieldNames = classDecl.Members.OfType<FieldDeclarationSyntax>()
+                .Where(static f => !f.Modifiers.Any(SyntaxKind.StaticKeyword) && !f.Modifiers.Any(SyntaxKind.ConstKeyword))
+                .SelectMany(static f => f.Declaration.Variables)
+                .Select(static v => v.Identifier.ValueText)
+                .ToHashSet();
+
+            var propNames = classDecl.Members.OfType<PropertyDeclarationSyntax>()
+                .Where(static p => !p.Modifiers.Any(SyntaxKind.StaticKeyword))
+                .Select(static p => p.Identifier.ValueText)
+                .ToHashSet();
+
+            if (fieldNames.Count == 0 && propNames.Count == 0) continue;
+
+            foreach (var method in classDecl.Members.OfType<MethodDeclarationSyntax>())
+            {
+                if (method.Modifiers.Any(SyntaxKind.StaticKeyword)) continue;
+                if (method.Body == null && method.ExpressionBody == null) continue;
+
+                var hasMutation = false;
+                var assignments = method.DescendantNodes().OfType<AssignmentExpressionSyntax>();
+                foreach (var assign in assignments)
+                {
+                    var target = assign.Left.ToString();
+                    if (target.StartsWith("this.", StringComparison.Ordinal)) target = target.Substring(5);
+                    if (fieldNames.Contains(target) || propNames.Contains(target))
+                    {
+                        hasMutation = true;
+                        break;
+                    }
+                }
+
+                if (hasMutation)
+                {
+                    var line = method.Identifier.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+                    findings.Add(new Finding(
+                        Rule: RuleContracts.DFG502.Rule,
+                        Path: filePath,
+                        Line: line,
+                        EndLine: line,
+                        Block: null,
+                        Message: RuleContracts.DFG502.Message(method.Identifier.ValueText, classDecl.Identifier.ValueText),
+                        Fix: RuleContracts.DFG502.Fix));
                 }
             }
         }

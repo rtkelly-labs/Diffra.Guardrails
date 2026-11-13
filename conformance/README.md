@@ -94,6 +94,12 @@ adapter must apply them the same way.
 | 037-contract-mutable-collection | Contract property declares mutable `List<T>` collection | DFG303 |
 | 038-contract-disallowed-class | Contract boundary declares mutable class instead of record | DFG304 |
 | 039-clean-pure-contract | Pure immutable contract record with read-only collection (no false positive) | none |
+| 040-record-deep-immutability-violation | Record property references a mutable reference class type | DFG401 |
+| 041-domain-entity-mutable-setter | Domain entity declares mutable setter `set;` instead of `init;` | DFG402 |
+| 042-banned-datetime-now | Domain logic accesses `DateTime.UtcNow` instead of `TimeProvider` | DFG403 |
+| 043-union-switch-wildcard-discard | Switch expression over union/enum uses wildcard discard `_` | DFG501 |
+| 044-domain-method-mutates-state | Domain instance method mutates state instead of acting as pure function | DFG502 |
+| 045-clean-exhaustive-union-match | Exhaustive match over union with zero discards and pure functions (no false positive) | none |
 
 ## Adding a case
 

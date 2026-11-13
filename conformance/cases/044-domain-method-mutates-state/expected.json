@@ -1,0 +1,23 @@
+{
+  "case": "044-domain-method-mutates-state",
+  "summary": "A domain class method mutates instance state directly instead of acting as a pure function.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_account_deposits_amount",
+    "csharp": "BankAccountTests.Account_deposits_amount",
+    "typescript": "account deposits amount"
+  },
+  "findings": [
+    {
+      "rule": "DFG502",
+      "block": null,
+      "line": { "python": 5, "csharp": 15, "typescript": 10 },
+      "fix": "Make method static and return a new state instead of mutating fields."
+    }
+  ]
+}

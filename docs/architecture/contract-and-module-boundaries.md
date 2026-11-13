@@ -261,6 +261,7 @@ Diffra Guardrails supports **both mechanisms simultaneously**:
 
 2. **Test-Time via Architectural Test Suites (`ContractBoundaryAssert`):**
    * Provides reflection and NetArchTest/ArchUnitNET compatible test assertions:
+
      ```csharp
      [Fact]
      public void Contracts_assembly_must_satisfy_pure_schema_rules()
@@ -268,4 +269,5 @@ Diffra Guardrails supports **both mechanisms simultaneously**:
          ContractBoundaryAssert.AssertAssembly(typeof(OrderDto).Assembly);
      }
      ```
+
    * Enforces whole-solution architectural invariants, package independence, and relational boundaries in standard test harnesses.

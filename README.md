@@ -12,7 +12,7 @@ Status: design. Nothing is built in this repository yet.
 
 - [VISION.md](VISION.md): what this is, the rules, and why.
 - [docs/](docs/README.md): documentation index organized by language and tool with progressive disclosure.
-- [docs/rules/](docs/rules/README.md): test structure (DFG1xx), functional architecture (DFG2xx), and contract purity (DFG3xx) rule specifications.
+- [docs/rules/](docs/rules/README.md): test structure (DFG1xx), functional architecture (DFG2xx), contract purity (DFG3xx), deep immutability (DFG4xx), and algebraic types & exhaustive matching (DFG5xx) rule specifications.
 - [docs/csharp/](docs/csharp/README.md): C# Roslyn analyzer, functional guidance, and performance tuning.
 - [docs/tool/](docs/tool/README.md): CLI runner, agent hooks, CI ratchet, and Diffra payloads.
-- [conformance/](conformance/README.md): the 39 conformance cases every adapter must agree on.
+- [conformance/](conformance/README.md): the 45 conformance cases every adapter must agree on.

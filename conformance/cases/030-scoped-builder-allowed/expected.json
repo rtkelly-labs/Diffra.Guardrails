@@ -1,0 +1,16 @@
+{
+  "case": "030-scoped-builder-allowed",
+  "summary": "A scoped builder encapsulated in a private factory method returning an immutable collection is allowed under the high-performance bundle, producing zero findings.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_scoped_builder_produces_immutable_array",
+    "csharp": "BasketTests.Scoped_builder_produces_immutable_array",
+    "typescript": "scoped builder produces immutable array"
+  },
+  "findings": []
+}

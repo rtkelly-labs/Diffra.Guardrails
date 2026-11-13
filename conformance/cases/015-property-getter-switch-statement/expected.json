@@ -1,0 +1,23 @@
+{
+  "case": "015-property-getter-switch-statement",
+  "summary": "A property getter executes procedural switch control flow with multiple statements instead of acting as a lightweight accessor.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_property_getter_executes_switch_statement",
+    "csharp": "BasketTests.Property_getter_executes_switch_statement",
+    "typescript": "property getter executes switch statement"
+  },
+  "findings": [
+    {
+      "rule": "DFG201",
+      "block": null,
+      "line": { "python": 6, "csharp": 11, "typescript": 6 },
+      "fix": "Convert 'TierDescription' to a method, or precompute and store the value in an init-only property or field."
+    }
+  ]
+}

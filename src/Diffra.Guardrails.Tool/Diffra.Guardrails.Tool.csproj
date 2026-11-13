@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Diffra.Guardrails.Core\Diffra.Guardrails.Core.csproj" />
+    <ProjectReference Include="..\Diffra.Guardrails.CSharp\Diffra.Guardrails.CSharp.csproj" />
+  </ItemGroup>
+</Project>

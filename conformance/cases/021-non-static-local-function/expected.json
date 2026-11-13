@@ -1,0 +1,23 @@
+{
+  "case": "021-non-static-local-function",
+  "summary": "A local function that captures no outer variables is missing the static modifier, risking closure allocation.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_local_function_without_static_captures_nothing",
+    "csharp": "BasketTests.Local_function_without_static_captures_nothing",
+    "typescript": "local function without static captures nothing"
+  },
+  "findings": [
+    {
+      "rule": "DFG204",
+      "block": "Arrange",
+      "line": { "python": 5, "csharp": 13, "typescript": 6 },
+      "fix": "Add the 'static' modifier to the lambda or local function."
+    }
+  ]
+}

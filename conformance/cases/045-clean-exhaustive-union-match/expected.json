@@ -1,0 +1,16 @@
+{
+  "case": "045-clean-exhaustive-union-match",
+  "summary": "An exhaustive pattern match over a closed enum with zero discards produces zero findings.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_switch_evaluates_discount_exhaustively",
+    "csharp": "OrderStatusTests.Switch_evaluates_discount_exhaustively",
+    "typescript": "switch evaluates discount exhaustively"
+  },
+  "findings": []
+}

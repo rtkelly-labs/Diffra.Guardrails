@@ -1,223 +1,338 @@
-# Diffra Guardrails: vision
+# Diffra Guardrails: Vision
 
-Status: proposal, 6 November 2026. Nothing here is built yet in this repository. A first Python
-checker for rules DFG101–DFG108 is being trialled in one private codebase and will move here once
-it has proved itself.
+Status: Specification & Vision, November 2026.
 
-## Purpose
+---
 
-AI agents now write a large share of the tests. Most of those tests pass and add coverage. Far
-fewer pin down behaviour, and fewer still tell a reviewer anything when they fail. Diffra Guardrails
-sets limits on the shape a test can take. A test written within them is short, has one purpose, and
-explains itself when it fails. A test that breaks them is reported in terms an agent can act on.
+## 1. The Core Purpose: Narrowing to the Pit of Success
 
-The project rests on one belief: **the right constraints, delivered at the moment a test is
-written, produce better tests than open-ended guidance**, whether a person or a model writes them.
-That belief is a hypothesis. The project measures it (see [Measurement](#measurement)) and drops any
-rule that does not earn its keep.
+> *"The Pit of Success: in stark contrast to previous designs, a well-designed platform makes it
+> easy to fall into winning practices and difficult to write bad code."*
+> — **Rico Mariani**, Microsoft Principal Architect
 
-Guardrails produces evidence and leaves the gating to Diffra. Each language's checker turns test
-code into typed findings, counts them, and emits them as a Diffra metrics payload. Diffra compares
-the payload with a trusted baseline and applies budgets. The checker stays deterministic and
-explainable, and Diffra makes sure test quality cannot get worse quietly, one agent change at a
-time.
+Today, autonomous AI agents write an ever-expanding share of production code and test suites. While
+these agents can quickly achieve passing tests and green checkmarks, they frequently fall into a
+**pit of procedural despair**:
 
-**Core rule:** each rule is defined once and checked the same way in every language. Comment
-markers declare the structure, and the checker confirms each block contains what its marker claims.
-Findings are evidence; policy decides what they mean. New tests must meet every rule, changed tests
-must meet the structural ones, and the rest of the repository is scored and ratcheted. No language
-model is involved in checking.
+- Generating unmaintainable "Assertion Roulette" tests with no explanation of failure.
+- Concealing cyclomatic complexity, loops, and conditional branching inside test bodies.
+- Stuffing complex LINQ queries, collection allocations, and loops into property getters.
+- Mutating shared collections in place (`Add`, `Remove`, `Sort`), creating temporal coupling.
+- Swallowing broad exceptions (`catch (Exception) {}`), destroying observability and stack traces.
+- Spawning heap delegate allocations through unconstrained, non-static closures.
+- Declaring uninitialized mutable variables and conditionally reassigning them across procedural
+  branches instead of using single-assignment expressions.
 
-## It is not only a checker
+Open-ended guidance (such as *"write clean, functional code"* or *"write readable tests"*) fails to
+prevent these failure modes. By the time a PR reviewer or a CI pipeline objects twenty minutes later,
+remediating the code requires costly context switching and rework.
 
-A rule that fires in CI, twenty minutes after an agent has finished, is the most expensive place to
-learn about a test's shape. Guardrails is a set of interventions, each cheap on its own, that make
-the right shape the default:
+**Diffra Guardrails provides deterministic structural boundaries that steer developers and AI
+agents directly into the Pit of Success.** By delivering instant, actionable constraints at the
+exact moment code is authored, the right architecture becomes the natural default.
 
-1. **Authoring defaults:** templates, an `AGENTS.md` block and a skill, so the first draft already
-   has markers.
-2. **Edit-time feedback:** an agent hook, pre-commit and IDE diagnostics, so findings reach the
-   agent inside its own edit loop.
-3. **CI:** one pinned action that gates changed tests, annotates lines and writes the Diffra payload.
-4. **Wrappers:** one CLI over every language's checker, test-runner plugins that improve failure
-   output, and a codemod for markers.
-5. **Baseline and ratchet:** a template Diffra rules file, so a repository adopts with no day-one
-   failures.
-6. **Measurement:** so each intervention is turned on only after its effect can be seen.
+---
 
-The design for each layer, its cost per repository and how to measure it are in
-[docs/interventions.md](docs/interventions.md).
+## 2. A Multi-Language Suite of Packages
 
-## Why constraints, and what they can and cannot do
+Diffra Guardrails is not a single monolith or language-bound linter. It is a **cohesive suite of
+native packages**, engineered in this repository and shipped across the primary package registries
+of modern software engineering:
 
-A test is worth keeping when its cost to read and maintain is less than what it tells you when it
-fails. Generated tests often fall short in the same few ways, all described in the literature:
-Assertion Roulette (van Deursen et al., *Refactoring Test Code*, 2001), Eager Test, Conditional Test
-Logic and Mystery Guest (Meszaros, *xUnit Test Patterns*, 2007). Open-ended advice such as "write
-clear tests" does not reach a model at the moment it writes the test. A rule that checks the shape,
-and that the agent reads as a finding in its own loop, does.
+```mermaid
+flowchart TD
+    Repo["Diffra.Guardrails Repository"] --> Core["Core Engine & Conformance"]
 
-The research sets honest limits on the claim:
+    subgraph Packages["Shipped Multi-Language Package Suite"]
+        Core --> DotNet["NuGet: Diffra.Guardrails (Roslyn Analyzer & Code Fixes)"]
+        Core --> FSharp["NuGet: Diffra.Guardrails.FSharp (FSharp.Analyzers.SDK Plugin)"]
+        Core --> Tool["NuGet: Diffra.Guardrails.Tool (diffra-guardrails CLI)"]
+        Core --> NPM["npm: eslint-plugin-diffra (ESLint Plugin for TS/JS)"]
+        Core --> PyPI["PyPI: diffra-guardrails (Python Checker & pytest Plugin)"]
+        Core --> Action["GitHub Action: diffra-guardrails-action (CI Gate & Metrics)"]
+    end
 
-- **Smells predict cost more than missed bugs.** Studies of test smells, including PyNose (Wang et
-  al., ASE 2021), link them to maintenance cost and flakiness more than to faults that escape. So
-  the rules aim at readability, diagnosis and maintenance. Whether a test finds bugs is measured
-  separately, by mutation score.
-- **Only some bans pay.** Boogerd and Moonen (around 2008) checked MISRA C rules against recorded
-  faults and found that only some correlated with faults; the rest added work. Each DFG rule
-  therefore needs a stated failure mode it prevents and a measure that shows it, and is retired if
-  the measure does not move.
-- **Assertion count matters.** Zhang and Mesbah (FSE 2015) found that the number of assertions
-  correlates strongly with a suite's effectiveness. DFG105 (one assertion per Then) must not
-  quietly reduce what a suite checks. Its intended fix is one assertion over a whole value (a
-  record, tuple or object) or a split into more tests, not a deleted check. The mutation score of
-  new tests is the check on this (see [Measurement](#measurement)).
-- **Small tests locate faults.** Trautsch, Herbold and Grabowski (JSS 2020) found that unit and
-  integration tests caught the same kinds of defect, but unit tests located them more precisely.
-  That is the case for the tight Act budget on small tests: one action, one place to look.
+    DotNet --> Consumer["Developer IDEs & CI Pipelines"]
+    FSharp --> Consumer
+    NPM --> Consumer
+    PyPI --> Consumer
+    Action --> Diffra["Diffra Metrics & Ratchet Budgets"]
+```
 
-The structure itself is Arrange-Act-Assert (Wake), or Given-When-Then for tests written as
-behaviour. Both are written as comment markers. Markers make the author's intent visible, so a
-person can review it and a tool can check it. Guessing structure from statements alone is
-unreliable, so it is used only for warnings and for one-off migrations.
+### The Shipped Artifacts
 
-## Rules
+1. **`Diffra.Guardrails` (NuGet):**
+   A zero-dependency Roslyn DiagnosticAnalyzer and CodeFixProvider for C# that runs live inside
+   Visual Studio, VS Code (C# Dev Kit), and `dotnet build`.
+2. **`Diffra.Guardrails.FSharp` (NuGet):**
+   An `FSharp.Analyzers.SDK` package bringing native F# compiler AST analysis to Ionide, Rider, and
+   command-line tooling.
+3. **`Diffra.Guardrails.Tool` (NuGet):**
+   A fast, cross-platform CLI tool (`diffra-guardrails`) for sub-second edit-time feedback, agent
+   hooks, and Diffra payload generation.
+4. **`eslint-plugin-diffra` (npm):**
+   An ESLint plugin enforcing structural test constraints and functional TypeScript idioms across
+   Vitest, Jest, and web applications.
+5. **`diffra-guardrails` (PyPI):**
+   A zero-dependency Python package combining stdlib AST and token analysis with a pytest runner
+   plugin.
+6. **`diffra-guardrails-action` (GitHub Marketplace):**
+   A composite action providing automated PR annotations, merge gating on changed code, and Diffra
+   ratchet telemetry.
 
-Rule IDs use one prefix, `DFG` (Diffra Guardrails), with a number range for each family, as .NET
-analyzers do with `CA` and `IDE`. An ID never changes meaning and is never reused. Each language maps
-the rule onto its own syntax. The checker being trialled uses the earlier prefix `DFA` with the same
-numbers; it switches to `DFG` when it moves here, before any release.
+### 2.1 Core Principle: Native Ecosystem Integration (Zero Forking)
 
-| ID | Rule | Gate | Prevents |
-| --- | --- | --- | --- |
-| DFG101 | Test has no `Arrange/Act/Assert` or `Given/When/Then` markers | new and changed tests | Intent nobody can review |
-| DFG102 | Marker misspelt or out of order (autofix to the exact form) | new and changed tests | Markers that drift until they mean nothing |
-| DFG103 | Act/When over budget for the test's size: small 1 statement; medium ≤ 2 When/Then pairs; large ≤ 4; every When followed by its Then | new and changed tests | Eager Test |
-| DFG104 | Assertion outside the Assert/Then block | new and changed tests | Checks hidden in setup |
-| DFG105 | More than one assertion in one Then, unless it is a single call to a custom assertion helper | new tests | Assertion Roulette |
-| DFG106 | Assertion with no failure message; a warning, never gated, where the assertion API has no place for one | new tests | Failures that need a debugger to read |
-| DFG107 | Low-quality message: restates the expression, contains the expected literal, uses a generic phrase, or is under three words | score only | Messages written to satisfy DFG106 |
-| DFG108 | Control flow (`if`, loop, `try`) in a test body | new and changed tests | Conditional Test Logic |
+A foundational architectural invariant of Diffra Guardrails is to **fit natively into the ecosystem of tools where viable, avoiding forking linting into different ecosystems**:
 
-DFG105 and DFG106 gate only **new** tests. Editing an old test makes you fix its structure, not
-rewrite every assertion in it. This is the choice the first checker made after meeting a real
-codebase, and it is what keeps the gate cheap to adopt.
+1. **Meet Developers in Their Native Workflow:**
+   - **.NET / C#:** Standard Roslyn `DiagnosticAnalyzer` & `CodeFixProvider` via NuGet. Integrates directly into `dotnet build`, `dotnet format`, Visual Studio, and VS Code C# Dev Kit with zero external processes.
+   - **TypeScript / JS:** Standard ESLint plugin (`eslint-plugin-diffra`) via npm. Integrates directly into `eslint .`, `next lint`, Prettier, and editor extensions.
+   - **Python:** Standard plugin via PyPI integrating directly with `pytest`, `ruff`, or `flake8` using native AST visitors.
+   - **F#:** Standard `FSharp.Analyzers.SDK` package running natively within Ionide, Rider, and compiler tooling.
 
-Accepted forms:
+2. **Reuse Existing Native Diagnostics; Build Only the Gaps:**
+   - Where an ecosystem already possesses robust rules (e.g. `CA1024` and `CA1031` in .NET SDK, `PT012` in pytest, or `@typescript-eslint` rules), Diffra reuses, configures, and maps them to the DFG canonical model rather than rebuilding redundant checks or forking linter engines.
+   - For novel architectural constraints where no upstream tooling exists (such as DFG1xx test shape, DFG3xx contract purity boundaries, DFG4xx deep immutability, and DFG5xx full-time union exhaustiveness), Diffra authors native plugins conforming to the host ecosystem's standard extension points.
 
-- **Act & Assert** is the one combined marker. It is for asserting an exception or rejection, as in
-  `pytest.raises`, `Assert.Throws` or `expect(...).rejects`. Such a form counts as an assertion for
-  DFG104 only.
-- **No Arrange** when there is nothing to set up.
-- **Shared context:** a fixture or class setup carries the Arrange/Act markers, and each test carries
-  only Assert. The checker finds the fixture's markers by looking up the fixture.
-- **Data-driven tests** (`parametrize`, `[Theory]`, `test.each`) are one test. The case table is
-  data, not Arrange statements.
+3. **Unified Governance & Ratchets:**
+   - While execution remains native and un-forked, Diffra provides the unifying rule contract, cross-language conformance validation, and ratchet metric budgets across the entire software estate.
 
-Precedence: when DFG101 fires, DFG102–DFG104 are not reported for that test, and DFG105 treats the
-unmarked body as one block. The [conformance corpus](conformance/README.md) pins these conventions.
+---
 
-**Exemptions** are written inline, name one rule ID and give a reason, and are counted as evidence in
-their own right. An exemption is never invisible. The syntax is defined per language in
-[docs/adapters.md](docs/adapters.md).
+## 3. Two Pillars of Guardrails
 
-**Test size** comes from what a test does: small runs in-process only; medium may use local I/O or
-child processes; large crosses process or network boundaries. Size is declared with the framework's
-usual mechanism (a marker, trait, tag or naming convention). An unmarked test gets the small budget,
-so a looser budget always has to be asked for. Declared sizes drift: Trautsch and Grabowski (ICST
-2017) found that developers overestimate how many unit tests they write. Where a runtime probe can
-measure a test's real size (by recording whether it opens a socket, starts a process or touches the
-disk), the measured size wins.
+Every package in the suite checks one unified catalog of canonical rules, split into two foundational
+pillars:
 
-**Later families** are listed for direction only and are not committed: 2xx test doubles (mocking the
-unit under test, asserting on a stub's own setup); 3xx assertion strength (tautologies, asserts that
-cannot fail, snapshots that cover everything); 4xx test data (Mystery Guest, unexplained literals);
-5xx timing (sleeps, wall-clock dependence, unseeded randomness, which Google's flaky-test reports
-and Gruber et al., ICST 2021, rank among the main causes of flakiness). Each family needs a failure
-mode often seen in generated tests, with a precise definition, before it becomes a rule.
+```mermaid
+flowchart LR
+    subgraph Pillar1["Pillar 1: Test Structure (DFG1xx)"]
+        D101["DFG101: AAA / GWT Markers"]
+        D102["DFG102: Marker Spelling & Order"]
+        D103["DFG103: Single Act Budget"]
+        D104["DFG104: Assertion Placement"]
+        D105["DFG105: Single Then Assertion"]
+        D106["DFG106: Failure Messages"]
+        D108["DFG108: No Test Control Flow"]
+    end
 
-## Languages
+    subgraph Pillar2["Pillar 2: Functional Architecture (DFG2xx)"]
+        D201["DFG201: No Behavior in Getters"]
+        D202["DFG202: Immutable Collections"]
+        D203["DFG203: Defensive Exceptions"]
+        D204["DFG204: Zero-Alloc Static Closures"]
+        D205["DFG205: Single Assignment Flow"]
+    end
 
-The rule specification is language-neutral. A language joins through an **adapter** that answers a
-fixed set of questions: what a test is, what an assertion is, where its message goes, how comments
-are reached, how size is declared and how shared context is expressed. The contract, and which
-existing linter rules each adapter reuses rather than rebuilds, are in
-[docs/adapters.md](docs/adapters.md).
+    subgraph Pillar3["Pillar 3: Contract & Data Purity (DFG3xx)"]
+        D301["DFG301: Pure Schemas (No Methods)"]
+        D302["DFG302: Auto-Properties Only"]
+        D303["DFG303: Immutable Collections"]
+        D304["DFG304: Permitted Declarations Only"]
+    end
 
-| Language | Host | Status |
-| --- | --- | --- |
-| Python | stdlib `ast` plus `tokenize`; no third-party parser | first version being trialled; moves here when proven |
-| C# | Roslyn analyzer, shipped as `Diffra.Guardrails` on NuGet, with code fixes for DFG102 | next |
-| TypeScript / JavaScript | ESLint plugin, `eslint-plugin-diffra`, covering Vitest and Jest | next |
-| F# | FSharp.Analyzers.SDK (Roslyn does not cover F#) | later |
+    subgraph Pillar4["Pillar 4: Deep Immutability & Type Safety (DFG4xx)"]
+        D401["DFG401: Deep Immutability in Records"]
+        D402["DFG402: Mandatory Init Domain Properties"]
+        D403["DFG403: Banned Non-Deterministic APIs"]
+    end
 
-Natural next languages are Go, Rust, Java/Kotlin and Swift. None is planned. The adapter contract and
-the conformance corpus exist so that adding one is bounded work, not a redesign.
+    subgraph Pillar5["Pillar 5: Algebraic Types & Exhaustive Matching (DFG5xx)"]
+        D501["DFG501: Full-Time Exhaustive Pattern Matching"]
+        D502["DFG502: Pure Domain Functions"]
+    end
+```
 
-**Conformance corpus.** A shared folder of test cases, each written in every supported language and
-paired with its expected findings. A language is supported once its adapter passes the whole corpus.
-A rule changes in the corpus first, then in every adapter. Without it the checkers would drift into
-dialects.
+### Pillar 1: Test Structure & Semantics (`DFG1xx`)
 
-## Gate shape
+Tests exist to pin down behavior and diagnose failures. Tests that violate structural boundaries
+obscure failure causes and increase maintenance overhead:
 
-A zero baseline does not work in a real codebase. The first one this was tried on had about 2,850
-tests and 6,400 asserts, of which 2% had a message. So:
+- **DFG101 (Markers Present):** Test must declare explicit `Arrange/Act/Assert` or
+  `Given/When/Then` comment markers.
+- **DFG102 (Marker Spelling & Order):** Markers must be correctly spelt and ordered (autofixable).
+- **DFG103 (Act Budget):** Act block budget is strictly proportional to test size (small test = 1
+  action). Prevents Eager Tests.
+- **DFG104 (Assertion Placement):** Assertions must reside in the Assert/Then block, not hidden in
+  setup.
+- **DFG105 (Single Assertion per Then):** Exactly one assertion per Then block, unless using a
+  registered compound helper. Eliminates Assertion Roulette.
+- **DFG106 (Failure Message):** Assertions must declare a diagnostic failure message saying *why* the
+  check matters.
+- **DFG108 (No Control Flow):** Prohibits `if`, loops, or `try` in test bodies. Prevents Conditional
+  Test Logic.
 
-- **Gate** only the test functions added or changed since the merge-base. Agents write many new
-  tests, and every one meets the rules from its first commit. Untouched tests are left alone.
-- **Score** the whole repository for each rule and report it as Diffra evidence. Diffra compares it
-  with the trusted baseline and applies budgets. Counts are grouped by file, so a fix in one file
-  cannot hide a regression in another.
-- **Budget only what should fall.** Diffra budgets increases, so every evaluated metric is a count
-  where lower is better: violations, assertions without a message, exemptions. Totals such as tests
-  and assertions are reported beside them but never budgeted. The rules file and its consequences
-  are in [docs/interventions.md](docs/interventions.md#5-baseline-and-ratchet).
+### Pillar 2: Functional Architecture & Clean Code (`DFG2xx`)
 
-## Findings an agent can act on
+Enforces modern functional programming hygiene across application code and test fixtures:
 
-The checker's main reader is an agent in the middle of an edit, not a person scanning CI output.
-Every finding names the rule, the exact lines, and the change that would fix it, such as "move this
-assertion under `# Assert`" or "split this test: it has two Then blocks". Messages are stable, so an
-agent's instructions can refer to them. Every rule has a short, deterministic explanation that can
-be passed to a model as context.
+- **DFG201 (No Behavior in Property Getters):** Properties must be lightweight, $O(1)$,
+  allocation-free accessors. Prohibits LINQ queries, collection allocations, and loops in getters.
+- **DFG202 (Immutable Collections & Transformations):** Prohibits in-place mutation (`Add`,
+  `Remove`, `Clear`, `Sort`). Steers toward collection expressions (`[.. a, .. b]`) and pure
+  transformations.
+- **DFG203 (Defensive Exception Discipline):** Prohibits broad or swallowed exceptions (`catch
+  (Exception) {}`); requires explicit types, exception filters (`when`), or rethrow (`throw;`).
+- **DFG204 (Zero-Allocation Closures):** Lambdas and local functions that capture no outer variables
+  must be marked `static` to eliminate closure heap allocations.
+- **DFG205 (Single Assignment & Expression Flow):** Prohibits declaring a mutable variable followed
+  by conditional branch reassignment; enforces switch expressions, ternary operators, or early
+  returns.
 
-## Measurement
+### Pillar 3: Contract & Data Purity (`DFG3xx`)
 
-Guardrails is judged by whether tests written under it get better, not by how many findings it
-raises. The headline measures:
+Strictly segregates pure schemas and data objects from behavioral execution pipelines:
 
-- findings per agent pull request, and the share of agent pull requests whose first push passes;
-- the mutation score of new tests, compared between tests written with and without the rules, so
-  that a rule which makes tests tidier but weaker shows up;
-- the share of new assertions with a message, and how often that message alone explains a killed
-  mutant.
+- **DFG301 (No Methods in Contract Types):** Pure contract types must not declare instance methods;
+  behavior belongs in standalone domain functions.
+- **DFG302 (Auto-Properties Only in Contracts):** Contract properties must be pure auto-properties
+  (`{ get; init; }` or `{ get; }`); no computed getters or expression bodies.
+- **DFG303 (Immutability & Collection Safety):** Prohibits mutable setters (`set;`) and mutable
+  collection types (`List<T>`) in favor of `IReadOnlyList<T>` and `ImmutableArray<T>`.
+- **DFG304 (Permitted Declaration Kinds):** Types in contract boundaries must be `record class`,
+  `record struct`, `enum`, `interface`, or static constants containers.
 
-Each intervention is switched on only after a baseline for its measure exists. Details are in
-[docs/interventions.md](docs/interventions.md#6-measurement).
+### Pillar 4: Deep Immutability & Type Safety (`DFG4xx`)
 
-## Deliberate first-version limits
+Enforces deep object and collection immutability, immutable domain properties, and eliminates
+uncontrolled runtime side-effects:
 
-Python first, then C# and TypeScript. No formatter, no general-purpose linting, and no autofix beyond
-marker spelling, order and the marker codemod. No language model in the checking loop. No coverage or
-mutation measurement: those are separate Diffra evidence, and Guardrails sits beside them. No rules
-about production code; rules run only on recognised test files. No plugin system for user rules
-until the adapter contract has held for three languages.
+- **DFG401 (Deep Immutability in Records):** Records and value types must not reference mutable classes
+  or collections.
+- **DFG402 (Mandatory Init Domain Properties):** Domain types must declare `{ get; init; }` or get-only
+  properties; mutable setters (`set;`) are prohibited.
+- **DFG403 (Banned Non-Deterministic & Blocking APIs):** Prohibits direct system clock reads
+  (`DateTime.Now`/`UtcNow` in favor of `TimeProvider`), thread sleeping (`Thread.Sleep`), and synchronous
+  task blocking (`.Result`/`.Wait()`).
 
-## Success test
+### Pillar 5: Algebraic Types & Exhaustive Matching (`DFG5xx`)
 
-The same test case, written in Python, C# and TypeScript, produces the same DFG findings in all
-three. An agent given only the finding text can fix the test. A change that adds a test with two
-Thens, or an assertion with no message, fails its gate. The same change to an existing, untouched
-test does not fail but shows in the repository score. Diffra reports the score change against the
-baseline, by rule and by file. Adding a fourth language takes an adapter and a passing corpus, and no
-change to the rules. And the mutation score of tests written under the rules is no lower than before.
+Turns pattern matching exhaustiveness into a full-time compile-time invariant and enforces pure functions:
 
-## Names
+- **DFG501 (Full-Time Exhaustive Pattern Matching):** Prohibits wildcard discards (`_ => ...`) on closed
+  union hierarchies, enums, and discriminated unions, guaranteeing unhandled variants cause compiler errors.
+- **DFG502 (Pure Domain Functions):** Domain operations must be pure static functions returning new state
+  rather than mutating instance fields.
 
-The project is **Diffra Guardrails**, and the repository is `Diffra.Guardrails`. Rule IDs are `DFG`
-plus a three-digit number. Packages: `Diffra.Guardrails` (NuGet, the Roslyn analyzer),
-`Diffra.Guardrails.Tool` (NuGet, the `diffra-guardrails` CLI as a .NET tool), `eslint-plugin-diffra`
-(npm) and `diffra-guardrails` (PyPI, the Python checker). Configuration lives with the Diffra
-configuration of the repository being checked. The project uses the Diffra protocol to share evidence and does not depend on the internals
-of the Diffra host.
+---
+
+## 4. Architectural Style Bundles: Purity vs. High Performance
+
+Pure functional immutability and zero-allocation systems programming can sometimes conflict. In hot
+paths, compilers, parsers, and AST analyzers, pure collection copying can cause garbage collection
+churn.
+
+Diffra Guardrails resolves this through **Architectural Style Bundles**:
+
+| Bundle | Primary Target | Immutability (DFG202) | Closures (DFG204) | Expression Flow (DFG205) |
+| --- | --- | --- | --- | --- |
+| **`functional`** | Domain logic, APIs, business models | Strict error; only `[.. a, b]` and pure transforms | Strict `static` error | Strict switch / ternary |
+| **`high-performance`** | Roslyn analyzers, parsers, compilers | Scoped builders allowed (`ImmutableArray.Builder`) | Strict `static` error (zero alloc) | Loops/imperative flow allowed in hot paths |
+| **`pragmatic`** (Default) | General application code | Immutable public surfaces; local private builders | Strict `static` error | Switch / ternary / early return |
+
+Configurable per project or directory via unified config (`diffra.config.json`) or native tool
+configurations (`.editorconfig`, `eslint.config.js`, `pyproject.toml`). (See [docs/rules/style-bundles.md](docs/rules/style-bundles.md)).
+
+---
+
+## 5. Grounded in Literature & Empirical Research
+
+Every rule is justified by empirical defect research and language performance architecture:
+
+- **Smells Predict Maintenance Cost:** Empirical studies (including PyNose, Wang et al., ASE 2021)
+  link Assertion Roulette and Conditional Test Logic directly to maintenance overhead and flakiness.
+- **Lightweight Accessor Contract:** Microsoft Framework Design Guidelines dictate that property
+  getters must not perform complex computations or allocate new collections.
+- **Collection Expression Optimization:** Stephen Toub's architectural analyses show how C#
+  collection expressions (`[.. a, .. b]`) avoid reallocation cliffs compared to procedural loops.
+- **Zero-Allocation Delegating:** Konrad Kokosa's *Pro .NET Memory Management* demonstrates that
+  non-static closures in loops are a primary source of Gen-0 garbage collection pressure.
+- **Fail-Fast Observability:** Martin Fowler's Fail-Fast principle and Microsoft exception standards
+  forbid broad catch swallowing to prevent quiet domain corruption.
+
+Full bibliography and durable links are maintained in
+[docs/architecture/literature-and-benchmarks.md](docs/architecture/literature-and-benchmarks.md).
+
+---
+
+## 6. The Conformance Corpus: The Cross-Language Oracle
+
+A rule changes in the **conformance corpus** first, then in each language package.
+
+The corpus contains **39 cross-language test suites** (cases `001` through `039`), each written in
+C#, Python, and TypeScript, paired with an exact `expected.json` oracle. A language package is
+certified only when its checker reports 100% agreement with the corpus findings. Dialect drift is
+strictly prohibited.
+
+```text
+conformance/
+  cases/
+    001-marked-small-test/               # Target test shape (none)
+    002-two-assertions-without-messages/ # Assertion Roulette (DFG105, DFG106)
+    ...
+    004-property-getter-with-linq/       # LINQ query in getter (DFG201)
+    005-collection-add-mutation/         # In-place Add mutation (DFG202)
+    ...
+    033-clean-early-return/              # Clean single assignment via guard clauses (none)
+```
+
+---
+
+## 7. Public Finding & Fix Contracts
+
+Findings are designed to be consumed directly by autonomous AI agents inside their edit loops. Every
+finding guarantees a stable, deterministic public contract:
+
+```json
+{
+  "rule": "DFG201",
+  "path": "src/Catalog/Pricing.cs",
+  "line": 14,
+  "endLine": 14,
+  "block": null,
+  "scope": "new",
+  "severity": "error",
+  "gated": true,
+  "message": "Property getter 'DiscountedItems' contains non-trivial behavior (LINQ query invocation); property getters must be lightweight, allocation-free accessors.",
+  "fix": "Convert 'DiscountedItems' to a method, or precompute and store the value in an init-only property or field."
+}
+```
+
+`message` and `fix` strings are immutable contracts. An agent reading the diagnostic receives the
+exact remediation action required to succeed.
+
+---
+
+## 8. Gating & The Diffra Metrics Ratchet
+
+Guardrails produces evidence; Diffra manages policy:
+
+- **Changed-Code Gate:** In pull requests, only new and modified code is gated. Legacy untouched
+  code never breaks a build.
+- **Metrics Ratchet:** Untouched code is continuously scored into Diffra metrics payloads
+  (`test-structure-v1` and `functional-architecture-v1`).
+- **Zero Day-One Failures:** Adoption requires no suite-wide rewrites. Diffra ratchets budgets downward
+  over time, guaranteeing code quality cannot silently degrade.
+
+---
+
+## 9. Dogfooding Principle
+
+**We run our own packages on ourselves on every build.**
+
+The `Diffra.Guardrails` repository enforces its own analyzers across all subsystems:
+
+- `Diffra.Guardrails.Core` runs under `bundle: functional` (pure records, init-only properties,
+  collection expressions).
+- `Diffra.Guardrails.CSharp` runs under `bundle: high-performance` (zero-allocation AST traversals,
+  static lambdas, and scoped builders).
+- `Diffra.Guardrails.Tool` runs under `bundle: pragmatic` (defensive exception flow, single
+  assignment).
+
+---
+
+## 10. Summary: The Pit of Success
+
+Diffra Guardrails replaces vague linting advice with an integrated suite of high-performance packages.
+By making clean, functional, and well-structured code the path of least resistance, developers and AI
+agents naturally fall into the Pit of Success.

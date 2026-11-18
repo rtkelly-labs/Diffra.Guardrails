@@ -43,11 +43,22 @@ public static class RuleContracts
         public const string WarningFix = "Use an assertion form that takes a message, or wrap this check in a registered helper that does.";
     }
 
+    public static class DFG107
+    {
+        public const string Rule = "DFG107";
+        public static string Message(string reason) => $"This failure message {reason}.";
+        public const string Fix = "Say what behaviour broke, not what the values were.";
+    }
+
     public static class DFG108
     {
         public const string Rule = "DFG108";
+        public const string LoopMessage = "This test has a loop.";
         public const string LoopFix = "Replace the loop with a data-driven test: one case per input.";
-        public const string ConditionalFix = "Split into two tests, or test the condition directly without branching in the test body.";
+        public const string ConditionalMessage = "This test has a branch.";
+        public const string ConditionalFix = "Split this test so each branch is its own test.";
+        public const string TryMessage = "This test catches exceptions itself.";
+        public const string TryFix = "Use the Act & Assert form to check the exception.";
     }
 
     // DFG2xx - Functional Architecture & Clean Code

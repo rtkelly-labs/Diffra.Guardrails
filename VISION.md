@@ -99,10 +99,12 @@ A foundational architectural invariant of Diffra Guardrails is to **fit natively
 
 ---
 
-## 3. Two Pillars of Guardrails
+## 3. Rule Families
 
-Every package in the suite checks one unified catalog of canonical rules, split into two foundational
-pillars:
+Every package in the suite checks one unified catalog of canonical rules, split into five families.
+Each rule states its scope (test code only, or all code) and its host class (checked from syntax by
+every host, or only by hosts with a semantic model); see
+[Scope and host class](docs/rules/README.md#3-scope-and-host-class).
 
 ```mermaid
 flowchart LR
@@ -113,6 +115,7 @@ flowchart LR
         D104["DFG104: Assertion Placement"]
         D105["DFG105: Single Then Assertion"]
         D106["DFG106: Failure Messages"]
+        D107["DFG107: Failure Message Quality"]
         D108["DFG108: No Test Control Flow"]
     end
 
@@ -159,6 +162,8 @@ obscure failure causes and increase maintenance overhead:
   registered compound helper. Eliminates Assertion Roulette.
 - **DFG106 (Failure Message):** Assertions must declare a diagnostic failure message saying *why* the
   check matters.
+- **DFG107 (Failure Message Quality):** Scores, never gates, messages that restate the expression,
+  contain the expected literal, use a generic phrase, or are under three words.
 - **DFG108 (No Control Flow):** Prohibits `if`, loops, or `try` in test bodies. Prevents Conditional
   Test Logic.
 
@@ -316,7 +321,16 @@ Guardrails produces evidence; Diffra manages policy:
 
 ---
 
-## 9. Dogfooding Principle
+## 9. Deliberate Limits
+
+- No language model in the checking loop. Every finding is deterministic and explainable.
+- No plugin system for user rules until the adapter contract has held for three languages. Until
+  then, other tools' findings come in by ingestion (SARIF or JSON), not as plugins.
+- A semantic rule is not promised in a language whose host has no semantic model.
+
+---
+
+## 10. Dogfooding Principle
 
 **We run our own packages on ourselves on every build.**
 
@@ -331,7 +345,7 @@ The `Diffra.Guardrails` repository enforces its own analyzers across all subsyst
 
 ---
 
-## 10. Summary: The Pit of Success
+## 11. Summary: The Pit of Success
 
 Diffra Guardrails replaces vague linting advice with an integrated suite of high-performance packages.
 By making clean, functional, and well-structured code the path of least resistance, developers and AI

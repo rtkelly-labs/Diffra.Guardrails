@@ -78,18 +78,37 @@ The DFG1xx rule family enforces structural constraints on the physical shape of 
 
 ---
 
-### DFG107: Mock Budget
+### DFG107: Low-Quality Failure Message
 
-* **Severity**: `error`
-* **Intent**: Small unit tests should rely on pure domain functions or stubs; mocking frameworks are capped.
-* **Message**: `This test configures {n} mocks; a {size} test allows {max}.`
-* **Fix**: `Use real domain instances or pure functions, or split the test.`
+* **Severity**: `warning` (score only, never gated)
+* **Intent**: A failure message written only to satisfy DFG106 says nothing. This scores messages that restate the expression, contain the expected literal, use a generic phrase, or are under three words.
+* **Message**: `This failure message {reason}.`
+* **Fix**: `Say what behaviour broke, not what the values were.`
+* `{reason}` is one of the values listed under DFG107 in [PLAN.md](../../PLAN.md#finding-text).
 
 ---
 
 ### DFG108: Control Flow in Test Body
 
 * **Severity**: `error`
-* **Intent**: Tests must be straight-line execution paths. Loops, `if` conditions, and `switch` statements inside a test body are banned.
-* **Message**: `Control flow statement in test body.`
-* **Fix**: `Replace the loop with a data-driven test: one case per input.`
+* **Intent**: Tests must be straight-line execution paths. `if`, `switch`, loops and `try` inside a test body are banned.
+* **Sub-rules**:
+  * **Loop**:
+    * **Message**: `This test has a loop.`
+    * **Fix**: `Replace the loop with a data-driven test: one case per input.`
+  * **Branch (`if`, `switch`)**:
+    * **Message**: `This test has a branch.`
+    * **Fix**: `Split this test so each branch is its own test.`
+  * **Try**:
+    * **Message**: `This test catches exceptions itself.`
+    * **Fix**: `Use the Act & Assert form to check the exception.`
+
+---
+
+### DFG109: Mock Budget
+
+* **Status**: proposed. Formerly drafted under DFG107, which keeps its meaning (message quality).
+* **Severity**: `error`
+* **Intent**: Small unit tests should rely on pure domain functions or stubs; mocking frameworks are capped.
+* **Message**: `This test configures {n} mocks; a {size} test allows {max}.`
+* **Fix**: `Use real domain instances or pure functions, or split the test.`

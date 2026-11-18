@@ -8,7 +8,7 @@ Diffra Guardrails provides deterministic structural boundaries across testing st
 
 ## 1. Rule Organization & Progressive Disclosure
 
-The rule catalogue is structured across two progressive rule families:
+The rule catalogue is structured across five rule families:
 
 ```mermaid
 flowchart TD
@@ -20,8 +20,9 @@ flowchart TD
         R104["DFG104: Assertion Placement"]
         R105["DFG105: Assertion Budget"]
         R106["DFG106: Failure Message"]
-        R107["DFG107: Mock Budget"]
-        R108["DFG108: Test Cyclomatic Complexity"]
+        R107["DFG107: Failure Message Quality"]
+        R108["DFG108: No Test Control Flow"]
+        R109["DFG109: Mock Budget (proposed)"]
     end
 
     subgraph DFG2xx["DFG2xx: Functional Architecture & Clean Code"]
@@ -95,6 +96,41 @@ Every Diffra Guardrails check emits findings conforming to a strict JSON structu
 
 ### Invariants
 
-1. **Rule IDs Never Change**: Rule identifiers (`DFG101`–`DFG205`) are permanent contracts. A retired rule retains its number and is never recycled.
+1. **Rule IDs Never Change**: Rule identifiers are permanent contracts. A retired rule retains its number and is never recycled.
 2. **Deterministic Fixes**: Every message is accompanied by an actionable fix instruction that an automated agent or developer can follow directly.
-3. **Language Neutrality**: Rule semantics are identical across all language adapters (C#, F#, TypeScript, Python). Conformance is proven via `conformance/cases/`.
+3. **Language Neutrality**: Rule semantics are identical across all language adapters (C#, F#, TypeScript, Python). Conformance is proven via `conformance/cases/`. A semantic rule (see [Scope and host class](#3-scope-and-host-class)) is checked only by hosts with type information.
+
+---
+
+## 3. Scope and Host Class
+
+Every rule states two things beside its ID.
+
+**Scope** is the code it runs on. `test` rules run only on recognised test files. `code` rules run
+on production and test code alike.
+
+**Host class** is what the rule needs to see. A `syntax` rule can be decided from one file's syntax
+tree, so every host checks it: the CLI, the Roslyn analyzer, ESLint and the Python checker. Their
+findings must agree, and the CLI-versus-analyzer parity test covers them. A `semantic` rule needs
+type or symbol information (what a name resolves to, whether a type is closed or mutable, what a
+lambda captures). Only hosts with a semantic model check it: the Roslyn analyzer for C#, and
+type-aware ESLint for TypeScript. Semantic rules are excused from the parity test, and their
+findings reach Diffra by ingesting the host's SARIF output, not from the CLI. A host without a
+semantic model skips their corpus cases and reports them as not checked, never as passing.
+
+| Rule | Scope | Host class | Why semantic |
+| --- | --- | --- | --- |
+| DFG101–DFG108 | test | syntax | |
+| DFG109 (proposed) | test | syntax | |
+| DFG201, DFG203, DFG205 | code | syntax | |
+| DFG202 | code | semantic | `Add` or `Sort` mutates only when the receiver is a mutable collection type |
+| DFG204 | code | semantic | Whether a lambda captures anything is a data-flow question |
+| DFG301–DFG304 | code | syntax | |
+| DFG401 | code | semantic | Whether a referenced type is mutable is known only from its declaration, often in another file |
+| DFG402 | code | syntax | |
+| DFG403 | code | semantic | `DateTime.Now` must resolve to `System.DateTime`, not a local type of the same name |
+| DFG501 | code | semantic | A wildcard is wrong only when the matched type is a closed enum or hierarchy |
+| DFG502 | code | syntax | |
+
+The classification is a proposal for review. A rule moves from `semantic` to `syntax` only if a
+corpus case shows a syntax-only adapter gets it right.

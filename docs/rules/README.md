@@ -107,15 +107,15 @@ Every Diffra Guardrails check emits findings conforming to a strict JSON structu
 Every rule states two things beside its ID.
 
 **Scope** is the code it runs on. `test` rules run only on recognised test files. `code` rules run
-on production and test code alike, unless the rule's own spec narrows them: DFG3xx to configured
-contract scopes, DFG402 and DFG502 to domain types, DFG403 to domain and pipeline code.
+on production and test code alike, unless the rule's own spec narrows them, as DFG3xx does to
+configured contract scopes.
 
 **Host class** is what the rule needs to see. A `syntax` rule can be decided from one file's syntax
 tree, so every host checks it: the CLI, the Roslyn analyzer, ESLint and the Python checker. Their
 findings must agree, and the CLI-versus-analyzer parity test covers them. A `semantic` rule needs
 type or symbol information (what a name resolves to, whether a type is closed or mutable, what a
-lambda captures). Only hosts with a semantic model check it: the Roslyn analyzer for C#, and
-type-aware ESLint for TypeScript. Semantic rules are excused from the parity test, and their
+lambda captures). Only hosts with a semantic model check it: the Roslyn analyzer for C#, type-aware
+ESLint for TypeScript, and FSharp.Analyzers.SDK's typed tree for F#. The Python checker has none. Semantic rules are excused from the parity test, and their
 findings reach Diffra by ingesting the host's SARIF output, not from the CLI. A host without a
 semantic model skips their corpus cases and reports them as not checked, never as passing.
 
@@ -133,5 +133,7 @@ semantic model skips their corpus cases and reports them as not checked, never a
 | DFG501 | code | semantic | A wildcard is wrong only when the matched type is a closed enum or hierarchy |
 | DFG502 | code | syntax | |
 
-The classification is a proposal for review. A rule moves from `semantic` to `syntax` only if a
+This is the target design. The first C# checker matches type names in syntax for the
+semantic rules; moving them onto the semantic model is tracked in issue #17. The classification is
+a proposal for review. A rule moves from `semantic` to `syntax` only if a
 corpus case shows a syntax-only adapter gets it right.

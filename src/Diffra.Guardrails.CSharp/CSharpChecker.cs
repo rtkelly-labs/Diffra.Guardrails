@@ -417,7 +417,7 @@ public static class CSharpChecker
                 Line: line,
                 EndLine: line,
                 Block: null,
-                Message: "Control flow statement in test body.",
+                Message: RuleContracts.DFG108.LoopMessage,
                 Fix: RuleContracts.DFG108.LoopFix));
         }
 

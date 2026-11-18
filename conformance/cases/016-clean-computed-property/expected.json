@@ -1,0 +1,16 @@
+{
+  "case": "016-clean-computed-property",
+  "summary": "A clean computed property evaluates lightweight arithmetic without allocations, LINQ queries, or control flow, producing zero findings.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_clean_computed_property_evaluates_simple_arithmetic",
+    "csharp": "BasketTests.Clean_computed_property_evaluates_simple_arithmetic",
+    "typescript": "clean computed property evaluates simple arithmetic"
+  },
+  "findings": []
+}

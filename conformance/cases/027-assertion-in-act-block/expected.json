@@ -1,0 +1,23 @@
+{
+  "case": "027-assertion-in-act-block",
+  "summary": "An assertion statement is placed in the Act block instead of the Assert block, violating DFG104.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_assertion_placed_inside_act_block",
+    "csharp": "BasketTests.Assertion_placed_inside_act_block",
+    "typescript": "assertion placed inside act block"
+  },
+  "findings": [
+    {
+      "rule": "DFG104",
+      "block": "Act",
+      "line": { "python": 10, "csharp": 15, "typescript": 10 },
+      "fix": "Move this assertion under 'Assert'."
+    }
+  ]
+}

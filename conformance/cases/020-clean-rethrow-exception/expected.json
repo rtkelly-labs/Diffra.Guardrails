@@ -1,0 +1,16 @@
+{
+  "case": "020-clean-rethrow-exception",
+  "summary": "Catching an exception and re-throwing with bare throw preserves the stack trace and diagnostic flow, producing zero findings.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_exception_logged_and_rethrown_preserves_diagnostics",
+    "csharp": "BasketTests.Exception_logged_and_rethrown_preserves_diagnostics",
+    "typescript": "exception logged and rethrown preserves diagnostics"
+  },
+  "findings": []
+}

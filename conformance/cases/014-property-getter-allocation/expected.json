@@ -1,0 +1,23 @@
+{
+  "case": "014-property-getter-allocation",
+  "summary": "A property getter allocates a new array on every invocation rather than exposing a lightweight accessor.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_property_getter_allocates_new_array",
+    "csharp": "BasketTests.Property_getter_allocates_new_array",
+    "typescript": "property getter allocates new array"
+  },
+  "findings": [
+    {
+      "rule": "DFG201",
+      "block": null,
+      "line": { "python": 3, "csharp": 9, "typescript": 4 },
+      "fix": "Convert 'DefaultTiers' to a method, or precompute and store the value in an init-only property or field."
+    }
+  ]
+}

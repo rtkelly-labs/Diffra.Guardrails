@@ -1,0 +1,16 @@
+{
+  "case": "012-capturing-lambda-allowed",
+  "summary": "A lambda capturing an outer local variable is allowed and must not be flagged by DFG204.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_lambda_capturing_outer_threshold_is_allowed",
+    "csharp": "BasketTests.Lambda_capturing_outer_threshold_is_allowed",
+    "typescript": "lambda capturing outer threshold is allowed"
+  },
+  "findings": []
+}

@@ -1,0 +1,23 @@
+{
+  "case": "041-domain-entity-mutable-setter",
+  "summary": "A domain entity declares a mutable setter 'set;' instead of 'init;' or get-only.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_entity_mutates_total",
+    "csharp": "OrderEntityTests.Entity_mutates_total",
+    "typescript": "entity mutates total"
+  },
+  "findings": [
+    {
+      "rule": "DFG402",
+      "block": null,
+      "line": { "python": 5, "csharp": 9, "typescript": 5 },
+      "fix": "Replace 'set;' with 'init;' or remove setter."
+    }
+  ]
+}

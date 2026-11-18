@@ -1,0 +1,23 @@
+{
+  "case": "042-banned-datetime-now",
+  "summary": "Code accesses system clock DateTime.UtcNow directly instead of injecting TimeProvider.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_read_timestamp_uses_system_clock",
+    "csharp": "AuditTests.Read_timestamp_uses_system_clock",
+    "typescript": "read timestamp uses system clock"
+  },
+  "findings": [
+    {
+      "rule": "DFG403",
+      "block": "Act",
+      "line": { "python": 8, "csharp": 14, "typescript": 8 },
+      "fix": "Use 'TimeProvider.GetUtcNow()' instead."
+    }
+  ]
+}

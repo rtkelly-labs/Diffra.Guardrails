@@ -1,0 +1,23 @@
+{
+  "case": "009-property-getter-with-control-flow",
+  "summary": "A property getter runs a loop and performs multi-statement computation instead of behaving as a lightweight, allocation-free accessor.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_property_getter_calculates_sum_via_loop",
+    "csharp": "BasketTests.Property_getter_calculates_sum_via_loop",
+    "typescript": "property getter calculates sum via loop"
+  },
+  "findings": [
+    {
+      "rule": "DFG201",
+      "block": null,
+      "line": { "python": 6, "csharp": 12, "typescript": 6 },
+      "fix": "Convert 'ComputedTotal' to a method, or precompute and store the value in an init-only property or field."
+    }
+  ]
+}

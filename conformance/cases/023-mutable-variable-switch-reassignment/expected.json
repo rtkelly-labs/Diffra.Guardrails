@@ -1,0 +1,23 @@
+{
+  "case": "023-mutable-variable-switch-reassignment",
+  "summary": "A mutable variable is declared and reassigned across branches of a procedural switch statement instead of using a switch expression.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_switch_statement_mutates_procedural_variable",
+    "csharp": "BasketTests.Switch_statement_mutates_procedural_variable",
+    "typescript": "switch statement mutates procedural variable"
+  },
+  "findings": [
+    {
+      "rule": "DFG205",
+      "block": "Act",
+      "line": { "python": 6, "csharp": 14, "typescript": 8 },
+      "fix": "Initialize 'label' directly using a switch expression, ternary expression, or return early."
+    }
+  ]
+}

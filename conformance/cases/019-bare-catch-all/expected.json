@@ -1,0 +1,23 @@
+{
+  "case": "019-bare-catch-all",
+  "summary": "A bare catch block with no declared exception type swallows faults indiscriminately and violates defensive exception discipline.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_bare_catch_block_swallows_fault",
+    "csharp": "BasketTests.Bare_catch_block_swallows_fault",
+    "typescript": "bare catch block swallows fault"
+  },
+  "findings": [
+    {
+      "rule": "DFG203",
+      "block": "Act",
+      "line": { "python": 11, "csharp": 18, "typescript": 11 },
+      "fix": "Catch a specific exception type, add an exception filter ('when (...)'), or rethrow with 'throw;' to preserve diagnostic flow."
+    }
+  ]
+}

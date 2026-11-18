@@ -1,0 +1,23 @@
+{
+  "case": "007-non-static-pure-lambda",
+  "summary": "A lambda does not capture any outer variables and should be declared static to avoid closure allocations.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_filter_uses_non_static_pure_lambda",
+    "csharp": "BasketTests.Filter_uses_non_static_pure_lambda",
+    "typescript": "filter uses non static pure lambda"
+  },
+  "findings": [
+    {
+      "rule": "DFG204",
+      "block": "Act",
+      "line": { "python": 6, "csharp": 16, "typescript": 8 },
+      "fix": "Add the 'static' modifier to the lambda or local function."
+    }
+  ]
+}

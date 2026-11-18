@@ -107,7 +107,8 @@ Every Diffra Guardrails check emits findings conforming to a strict JSON structu
 Every rule states two things beside its ID.
 
 **Scope** is the code it runs on. `test` rules run only on recognised test files. `code` rules run
-on production and test code alike.
+on production and test code alike, unless the rule's own spec narrows them: DFG3xx to configured
+contract scopes, DFG402 and DFG502 to domain types, DFG403 to domain and pipeline code.
 
 **Host class** is what the rule needs to see. A `syntax` rule can be decided from one file's syntax
 tree, so every host checks it: the CLI, the Roslyn analyzer, ESLint and the Python checker. Their

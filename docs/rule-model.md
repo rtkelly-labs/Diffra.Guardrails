@@ -92,14 +92,17 @@ only language with two hosts in the same process.
 ## Semantic rules
 
 A semantic rule is a native check in a host with a semantic model: a Roslyn `DiagnosticAnalyzer`
-for C#, a type-aware ESLint rule for TypeScript. Python and F# have no such host planned, so
-semantic rules are not promised there ([VISION.md](../VISION.md#9-deliberate-limits)).
+for C#, a type-aware ESLint rule for TypeScript, an FSharp.Analyzers.SDK analyzer over the typed
+tree for F#. The Python checker has no semantic model, so semantic rules are not promised there
+([VISION.md](../VISION.md#9-deliberate-limits)).
 
 - **It keeps the shared contract.** Its ID, `message` and `fix` text, scope and gate come from the
   registry, like any rule. Only the check is per language.
 - **It has corpus cases.** Hosts with a semantic model must pass them. Hosts without one skip them
   and report them as not checked, never as passing.
-- **It reaches Diffra by ingestion.** The CLI is syntax-only, so it never runs a semantic rule. The
+- **It reaches Diffra by ingestion.** The CLI is syntax-only, so in the target design it never
+  runs a semantic rule. The first C# checker (#7) still emits them from name matching in syntax;
+  issue #17 moves them onto the semantic model. The
   build's SARIF goes through `ingest --sarif` ([interventions](interventions.md#4-wrappers)) into
   the same payload. The edit-time hook does not see semantic findings; the IDE and the build do.
 - **It uses the semantic model.** A semantic rule that matches type names in syntax gives wrong
@@ -176,12 +179,12 @@ definition, a scope, a host class and a corpus case, as the
 | Count of warning suppressions in test projects: `#pragma warning disable`, `[SuppressMessage]`, `NoWarn` | Evidence only | A count in the score payload, budgeted like exemptions. It is not a gated rule |
 | Empty `catch` of a specific type, such as `catch (IOException) {}` | DFG2xx, `code` scope, syntax | DFG203 bans broad catches but accepts a specific type, so an empty handler passes. Settle whether it is a DFG203 variant or a new rule before it gets an ID |
 
-**Sleeps in tests** need no new rule. DFG403 bans `Thread.Sleep`, but its spec limits it to domain
-and pipeline code. Widening DFG403's scope to test code is the change to make, in its spec and
-corpus first.
+**Sleeps in tests** need no new rule. DFG403 bans `Thread.Sleep` and is a `code` rule, so it already
+runs in tests: case 042 fires it on `DateTime.UtcNow` inside a test. The corpus has no
+`Thread.Sleep` case yet; add one.
 
-Numbers are assigned when a rule lands, in its family's range in the
-[rule catalogue](rules/README.md), and never before.
+A number is assigned when a rule is specified in the [rule catalogue](rules/README.md), in its
+family's range, as DFG109 (mock budget) is. A proposal on this page has none.
 
 ## Reject from slopwatch
 

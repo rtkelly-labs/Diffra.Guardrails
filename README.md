@@ -15,4 +15,6 @@ Status: design. Nothing is built in this repository yet.
   ratchet, and how to tell whether any of it helps.
 - [docs/adapters.md](docs/adapters.md): what a language adapter must do, and which existing linter
   rules it reuses.
+- [docs/rule-model.md](docs/rule-model.md): the rule plugin model: adapters, rules, hosts and the
+  registry, and what to borrow from slopwatch.
 - [conformance/](conformance/README.md): the cases every adapter must agree on.

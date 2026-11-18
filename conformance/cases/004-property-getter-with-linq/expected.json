@@ -1,0 +1,23 @@
+{
+  "case": "004-property-getter-with-linq",
+  "summary": "A property getter evaluates a LINQ query and allocates a new collection on every invocation instead of exposing a lightweight accessor.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_property_getter_evaluates_active_items",
+    "csharp": "BasketTests.Property_getter_evaluates_active_items",
+    "typescript": "property getter evaluates active items"
+  },
+  "findings": [
+    {
+      "rule": "DFG201",
+      "block": null,
+      "line": { "python": 6, "csharp": 12, "typescript": 5 },
+      "fix": "Convert 'DiscountedItems' to a method, or precompute and store the value in an init-only property or field."
+    }
+  ]
+}

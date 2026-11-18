@@ -1,0 +1,23 @@
+{
+  "case": "028-property-getter-new-collection",
+  "summary": "A property getter instantiates a new List collection on every invocation instead of serving as a lightweight accessor.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_property_getter_allocates_new_list",
+    "csharp": "BasketTests.Property_getter_allocates_new_list",
+    "typescript": "property getter allocates new list"
+  },
+  "findings": [
+    {
+      "rule": "DFG201",
+      "block": null,
+      "line": { "python": 3, "csharp": 10, "typescript": 4 },
+      "fix": "Convert 'Categories' to a method, or precompute and store the value in an init-only property or field."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "case": "025-misspelt-marker-order",
+  "summary": "A marker is misspelt as 'Arange', triggering DFG102 with a fix to exactly 'Arrange'.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_marker_misspelt_triggers_diagnostic",
+    "csharp": "BasketTests.Marker_misspelt_triggers_diagnostic",
+    "typescript": "marker misspelt triggers diagnostic"
+  },
+  "findings": [
+    {
+      "rule": "DFG102",
+      "block": "Arrange",
+      "line": { "python": 5, "csharp": 10, "typescript": 5 },
+      "fix": "Change the comment to exactly 'Arrange'."
+    }
+  ]
+}

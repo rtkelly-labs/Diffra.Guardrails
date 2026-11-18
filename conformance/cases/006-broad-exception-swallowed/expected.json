@@ -1,0 +1,23 @@
+{
+  "case": "006-broad-exception-swallowed",
+  "summary": "A broad exception is caught and swallowed without an exception filter or rethrow, obscuring fault diagnosis.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_catch_block_swallows_broad_exception",
+    "csharp": "BasketTests.Catch_block_swallows_broad_exception",
+    "typescript": "catch block swallows broad exception"
+  },
+  "findings": [
+    {
+      "rule": "DFG203",
+      "block": "Act",
+      "line": { "python": 11, "csharp": 19, "typescript": 11 },
+      "fix": "Catch a specific exception type, add an exception filter ('when (...)'), or rethrow with 'throw;' to preserve diagnostic flow."
+    }
+  ]
+}

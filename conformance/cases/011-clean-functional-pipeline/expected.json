@@ -1,0 +1,16 @@
+{
+  "case": "011-clean-functional-pipeline",
+  "summary": "A clean functional test adhering to all structural and functional rules: AAA markers, single Act, pure transformation, lightweight accessor, and zero mutations.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_clean_functional_pipeline_executes_purely",
+    "csharp": "BasketTests.Clean_functional_pipeline_executes_purely",
+    "typescript": "clean functional pipeline executes purely"
+  },
+  "findings": []
+}

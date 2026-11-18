@@ -1,0 +1,23 @@
+{
+  "case": "026-act-budget-exceeded",
+  "summary": "Act block in a small test contains two statements where only one statement is permitted.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_act_block_has_two_statements",
+    "csharp": "BasketTests.Act_block_has_two_statements",
+    "typescript": "act block has two statements"
+  },
+  "findings": [
+    {
+      "rule": "DFG103",
+      "block": "Act",
+      "line": { "python": 10, "csharp": 15, "typescript": 10 },
+      "fix": "Move setup into Arrange, or split this test in two."
+    }
+  ]
+}

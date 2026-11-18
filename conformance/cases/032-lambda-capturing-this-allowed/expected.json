@@ -1,0 +1,16 @@
+{
+  "case": "032-lambda-capturing-this-allowed",
+  "summary": "A lambda capturing an instance field (this) cannot be declared static and must not be flagged by DFG204.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_lambda_capturing_instance_state_is_allowed",
+    "csharp": "BasketTests.Lambda_capturing_instance_state_is_allowed",
+    "typescript": "lambda capturing instance state is allowed"
+  },
+  "findings": []
+}

@@ -1,0 +1,23 @@
+{
+  "case": "040-record-deep-immutability-violation",
+  "summary": "A record declares a property of a mutable reference class type, violating deep immutability.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_record_reads_address_street",
+    "csharp": "CustomerTests.Record_reads_address_street",
+    "typescript": "record reads address street"
+  },
+  "findings": [
+    {
+      "rule": "DFG401",
+      "block": null,
+      "line": { "python": 11, "csharp": 11, "typescript": 9 },
+      "fix": "Make type an immutable record or value type, or use an immutable collection."
+    }
+  ]
+}

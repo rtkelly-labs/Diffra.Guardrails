@@ -1,0 +1,23 @@
+{
+  "case": "038-contract-disallowed-class",
+  "summary": "A contract type in a contract namespace is declared as a standard mutable class instead of a record, enum, or interface.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_contract_reads_name",
+    "csharp": "UserContractTests.Contract_reads_name",
+    "typescript": "contract reads name"
+  },
+  "findings": [
+    {
+      "rule": "DFG304",
+      "block": null,
+      "line": { "python": 1, "csharp": 6, "typescript": 3 },
+      "fix": "Convert 'UserContract' to a record or interface, or move non-contract declarations outside the contract boundary."
+    }
+  ]
+}

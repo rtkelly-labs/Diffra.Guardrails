@@ -1,0 +1,23 @@
+{
+  "case": "031-rethrow-losing-stack-trace",
+  "summary": "Catch block rethrows exception using an explicit identifier (throw ex) rather than a bare throw, destroying the original stack trace.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_rethrow_with_identifier_truncates_stack",
+    "csharp": "BasketTests.Rethrow_with_identifier_truncates_stack",
+    "typescript": "rethrow with identifier truncates stack"
+  },
+  "findings": [
+    {
+      "rule": "DFG203",
+      "block": "Act & Assert",
+      "line": { "python": 14, "csharp": 21, "typescript": 11 },
+      "fix": "Catch a specific exception type, add an exception filter ('when (...)'), or rethrow with 'throw;' to preserve diagnostic flow."
+    }
+  ]
+}

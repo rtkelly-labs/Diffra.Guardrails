@@ -1,0 +1,16 @@
+{
+  "case": "022-clean-static-lambda",
+  "summary": "Using a static lambda or top-level function guarantees zero closure allocation, producing zero findings.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_static_lambda_guarantees_zero_closure_allocation",
+    "csharp": "BasketTests.Static_lambda_guarantees_zero_closure_allocation",
+    "typescript": "static lambda guarantees zero closure allocation"
+  },
+  "findings": []
+}

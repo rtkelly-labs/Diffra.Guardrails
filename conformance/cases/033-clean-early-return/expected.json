@@ -1,0 +1,16 @@
+{
+  "case": "033-clean-early-return",
+  "summary": "Using early return guard clauses avoids declaring and mutating intermediate state variables, producing zero findings.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_early_return_flow_evaluates_purely",
+    "csharp": "BasketTests.Early_return_flow_evaluates_purely",
+    "typescript": "early return flow evaluates purely"
+  },
+  "findings": []
+}

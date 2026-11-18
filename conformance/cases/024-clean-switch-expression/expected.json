@@ -1,0 +1,16 @@
+{
+  "case": "024-clean-switch-expression",
+  "summary": "Using a switch expression or mapping to initialize a variable via single assignment produces zero findings.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_switch_expression_binds_single_assignment",
+    "csharp": "BasketTests.Switch_expression_binds_single_assignment",
+    "typescript": "switch expression binds single assignment"
+  },
+  "findings": []
+}

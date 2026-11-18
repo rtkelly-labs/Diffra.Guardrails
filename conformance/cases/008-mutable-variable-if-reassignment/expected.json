@@ -1,0 +1,23 @@
+{
+  "case": "008-mutable-variable-if-reassignment",
+  "summary": "A mutable variable is declared and reassigned across conditional branches instead of using single assignment via an expression or early return.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_status_assigned_across_conditional_branches",
+    "csharp": "BasketTests.Status_assigned_across_conditional_branches",
+    "typescript": "status assigned across conditional branches"
+  },
+  "findings": [
+    {
+      "rule": "DFG205",
+      "block": "Act",
+      "line": { "python": 6, "csharp": 14, "typescript": 8 },
+      "fix": "Initialize 'tier' directly using a switch expression, ternary expression, or return early."
+    }
+  ]
+}

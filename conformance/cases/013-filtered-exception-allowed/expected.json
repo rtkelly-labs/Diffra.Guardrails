@@ -1,0 +1,16 @@
+{
+  "case": "013-filtered-exception-allowed",
+  "summary": "Catching an exception with an explicit exception filter or condition is disciplined and must not be flagged by DFG203.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_filtered_exception_catch_is_allowed",
+    "csharp": "BasketTests.Filtered_exception_catch_is_allowed",
+    "typescript": "filtered exception catch is allowed"
+  },
+  "findings": []
+}

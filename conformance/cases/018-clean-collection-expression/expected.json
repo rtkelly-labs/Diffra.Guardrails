@@ -1,0 +1,16 @@
+{
+  "case": "018-clean-collection-expression",
+  "summary": "Combining collections using modern spread/collection expressions is a pure transformation and produces zero findings.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_collection_expression_combines_purely",
+    "csharp": "BasketTests.Collection_expression_combines_purely",
+    "typescript": "collection expression combines purely"
+  },
+  "findings": []
+}

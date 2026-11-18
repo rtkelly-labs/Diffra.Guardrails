@@ -1,0 +1,23 @@
+{
+  "case": "036-contract-mutable-setter",
+  "summary": "A contract property declares a mutable setter 'set;' instead of 'init;' or get-only.",
+  "size": "small",
+  "files": {
+    "python": "test_case.py",
+    "csharp": "CaseTests.cs",
+    "typescript": "case.test.ts"
+  },
+  "test": {
+    "python": "test_contract_sets_amount",
+    "csharp": "InvoiceContractTests.Contract_sets_amount",
+    "typescript": "contract sets amount"
+  },
+  "findings": [
+    {
+      "rule": "DFG303",
+      "block": null,
+      "line": { "python": 6, "csharp": 9, "typescript": 5 },
+      "fix": "Change 'set;' to 'init;' or remove setter."
+    }
+  ]
+}

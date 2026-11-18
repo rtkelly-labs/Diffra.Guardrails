@@ -264,10 +264,11 @@ Full bibliography and durable links are maintained in
 
 A rule changes in the **conformance corpus** first, then in each language package.
 
-The corpus contains **39 cross-language test suites** (cases `001` through `039`), each written in
+The corpus contains **45 cross-language test suites** (cases `001` through `045`), each written in
 C#, Python, and TypeScript, paired with an exact `expected.json` oracle. A language package is
-certified only when its checker reports 100% agreement with the corpus findings. Dialect drift is
-strictly prohibited.
+certified only when its checker reports 100% agreement with the corpus findings it can check: every
+syntax rule, and every semantic rule if its host has a semantic model. Dialect drift is strictly
+prohibited.
 
 ```text
 conformance/

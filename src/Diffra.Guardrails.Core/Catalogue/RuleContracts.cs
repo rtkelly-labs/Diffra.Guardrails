@@ -27,7 +27,7 @@ public static class RuleContracts
     public static class DFG104
     {
         public const string Rule = "DFG104";
-        public const string Fix = "Move this assertion under 'Assert'.";
+        public static string Fix(string expected) => $"Move this assertion under '{expected}'.";
     }
 
     public static class DFG105

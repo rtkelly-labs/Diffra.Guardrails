@@ -2,7 +2,9 @@
 
 Each case is one test, written once in every supported language, plus the findings every adapter
 must report for it. A language is supported when its adapter reports exactly the expected findings
-for every case. A rule changes here first, then in each adapter.
+for every case. A semantic rule's findings bind only hosts with a semantic model (see
+[Scope and host class](../docs/rules/README.md#3-scope-and-host-class)); a host without one reports
+those cases as not checked. A rule changes here first, then in each adapter.
 
 Status: skeleton. There is no checker in this repository yet. The cases are data only.
 

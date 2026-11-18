@@ -481,7 +481,7 @@ public static class CSharpChecker
                         EndLine: line,
                         Block: "Act",
                         Message: "This assertion is in the Act block.",
-                        Fix: RuleContracts.DFG104.Fix));
+                        Fix: RuleContracts.DFG104.Fix(actMarker.Name is "When" ? "Then" : "Assert")));
                 }
             }
         }

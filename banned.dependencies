@@ -1,0 +1,13 @@
+// Packages this repository must not resolve. Checked by `diffra-guardrails deps check` in CI.
+// Format and rules: docs/dependencies.md.
+
+// Licences
+nuget FluentAssertions >= 8.0 // Xceed commercial licence from 8.0; use AwesomeAssertions or FluentAssertions 7.x
+nuget Microsoft.Testing.Extensions.CodeCoverage // proprietary Microsoft licence; the TUnit and MSTest meta-packages and MSTest.Sdk's Default profile bring it in, so reference the framework packages directly
+nuget Microsoft.Testing.Extensions.Retry // proprietary Microsoft Testing Platform extension licence
+// Pending a decision (#19): Microsoft.NET.Test.Sdk depends on Microsoft.CodeCoverage, so this ban
+// flags every VSTest project, this repository's tests included. CI reports it but does not fail.
+nuget Microsoft.CodeCoverage // proprietary Microsoft licence; brought in by Microsoft.NET.Test.Sdk
+
+// Known-bad releases
+nuget Moq >= 4.20.0 < 4.20.2 // SponsorLink in 4.20.0 and 4.20.1; use 4.20.2 or later

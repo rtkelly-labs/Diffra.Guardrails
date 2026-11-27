@@ -66,7 +66,7 @@ jobs:
           esac
           changed="$(git -c core.quotePath=false diff --name-only --no-renames "$base...$head")"
           printf 'Changed files:\n%s\n' "$changed"
-          if grep -qE '^(src/|tests/|conformance/|global\.json$|Directory\.(Build|Packages)\.(props|targets)$|[^/]*\.slnx$|\.github/workflows/ci\.yml$)' <<< "$changed"; then
+          if grep -qE '^(src/|tests/|conformance/|global\.json$|banned\.dependencies$|Directory\.(Build|Packages)\.(props|targets)$|[^/]*\.slnx$|\.github/workflows/ci\.yml$)' <<< "$changed"; then
             echo "run=true" >> "$GITHUB_OUTPUT"
           else
             echo "run=false" >> "$GITHUB_OUTPUT"
@@ -79,3 +79,10 @@ jobs:
       - name: Test
         if: steps.decide.outputs.run == 'true'
         run: dotnet test Diffra.Guardrails.slnx -m:2
+      # Dogfood the banned dependency check on the graphs the test step just restored. Report mode
+      # (continue-on-error) until the Microsoft.CodeCoverage ban is decided (#19): every VSTest
+      # project resolves it through Microsoft.NET.Test.Sdk, this repository's tests included.
+      - name: Banned dependencies (report only)
+        if: steps.decide.outputs.run == 'true'
+        continue-on-error: true
+        run: dotnet run --project src/Diffra.Guardrails.Tool --no-build -- deps check --exclude conformance --exclude temp

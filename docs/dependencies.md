@@ -53,6 +53,9 @@ nuget Moq >= 4.20.0 < 4.20.2 // SponsorLink in 4.20.0 and 4.20.1
   with exit 2. Skipping it would let the package through.
 - Blank lines and lines starting with `//` or `#` are comments.
 
+This repository's own list is [`banned.dependencies`](../banned.dependencies). CI checks it after
+the tests restore, in report mode: the step prints findings but does not fail the job.
+
 ## What is read
 
 | File | Graph | Direct dependencies |

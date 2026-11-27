@@ -1,0 +1,5 @@
+NUGET
+  remote: https://api.nuget.org/v3/index.json
+    Pricing.Testing.Helpers (2.0)
+      Pricing.Licensing (>= 1.0)
+    Pricing.Licensing (1.4)

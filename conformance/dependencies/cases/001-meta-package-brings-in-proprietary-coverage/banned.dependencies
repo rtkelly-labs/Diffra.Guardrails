@@ -1,0 +1,2 @@
+// The ban is written in lower case on purpose: package IDs compare case-insensitively.
+nuget microsoft.testing.extensions.codecoverage // closed source; use coverlet.MTP

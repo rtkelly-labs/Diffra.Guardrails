@@ -1,0 +1,15 @@
+{
+  "case": "004-exemption-active-and-expired",
+  "summary": "An exemption still in date gives no finding; one past its date gives DFG602",
+  "today": "2026-11-27",
+  "exit": 1,
+  "findings": [
+    {
+      "rule": "DFG602",
+      "path": "Pricing.Tests/project.assets.json",
+      "package": "Pricing.Reports",
+      "version": "3.1.0",
+      "via": ["Pricing.Reports 3.1.0"]
+    }
+  ]
+}

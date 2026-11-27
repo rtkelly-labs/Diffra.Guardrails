@@ -1,0 +1,15 @@
+{
+  "case": "006-tool-manifest-and-id-case",
+  "summary": "Local tools are outside both restore graphs, so the tool manifest is read too; IDs ignore case",
+  "today": "2026-11-27",
+  "exit": 1,
+  "findings": [
+    {
+      "rule": "DFG601",
+      "path": ".config/dotnet-tools.json",
+      "package": "dotnet-coverage",
+      "version": "18.0.0",
+      "via": ["dotnet-coverage 18.0.0"]
+    }
+  ]
+}

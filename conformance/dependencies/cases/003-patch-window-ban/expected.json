@@ -1,0 +1,15 @@
+{
+  "case": "003-patch-window-ban",
+  "summary": "A range ban covers two patch releases; the next patch is allowed",
+  "today": "2026-11-27",
+  "exit": 1,
+  "findings": [
+    {
+      "rule": "DFG601",
+      "path": "Pricing.Tests/project.assets.json",
+      "package": "Moq",
+      "version": "4.20.1",
+      "via": ["Moq 4.20.1"]
+    }
+  ]
+}

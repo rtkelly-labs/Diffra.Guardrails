@@ -136,6 +136,12 @@ cannot fail, snapshots that cover everything); 4xx test data (Mystery Guest, une
 and Gruber et al., ICST 2021, rank among the main causes of flakiness). Each family needs a failure
 mode often seen in generated tests, with a precise definition, before it becomes a rule.
 
+**Dependency policy (6xx)** is the one family that does not look at tests. DFG601 fails a build that
+resolves a banned package version, such as one under a commercial licence, directly or
+transitively; DFG602 fails one whose exemption from a ban has expired. It reads restore and Paket
+lock files rather than test files, so it has one implementation, not an adapter per language. See
+[docs/dependencies.md](docs/dependencies.md).
+
 ## Languages
 
 The rule specification is language-neutral. A language joins through an **adapter** that answers a
@@ -201,7 +207,8 @@ Each intervention is switched on only after a baseline for its measure exists. D
 Python first, then C# and TypeScript. No formatter, no general-purpose linting, and no autofix beyond
 marker spelling, order and the marker codemod. No language model in the checking loop. No coverage or
 mutation measurement: those are separate Diffra evidence, and Guardrails sits beside them. No rules
-about production code; rules run only on recognised test files. No plugin system for user rules
+about production code; rules run only on recognised test files, apart from the dependency-policy
+family, which reads resolved dependency graphs. No plugin system for user rules
 until the adapter contract has held for three languages.
 
 ## Success test

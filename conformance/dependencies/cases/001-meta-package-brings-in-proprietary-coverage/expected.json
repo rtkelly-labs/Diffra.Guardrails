@@ -1,0 +1,15 @@
+{
+  "case": "001-meta-package-brings-in-proprietary-coverage",
+  "summary": "A meta-package pulls in a banned package transitively; two restore targets give one finding",
+  "today": "2026-11-27",
+  "exit": 1,
+  "findings": [
+    {
+      "rule": "DFG601",
+      "path": "Pricing.Tests/project.assets.json",
+      "package": "Microsoft.Testing.Extensions.CodeCoverage",
+      "version": "18.0.0",
+      "via": ["TUnit 1.0.0", "Microsoft.Testing.Extensions.CodeCoverage 18.0.0"]
+    }
+  ]
+}

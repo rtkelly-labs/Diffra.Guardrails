@@ -1,0 +1,55 @@
+{
+  "version": 3,
+  "targets": {
+    "net10.0": {
+      "TUnit/1.0.0": {
+        "type": "package",
+        "dependencies": {
+          "TUnit.Engine": "1.0.0",
+          "Microsoft.Testing.Extensions.CodeCoverage": "18.0.0"
+        }
+      },
+      "TUnit.Engine/1.0.0": {
+        "type": "package"
+      },
+      "Microsoft.Testing.Extensions.CodeCoverage/18.0.0": {
+        "type": "package"
+      },
+      "Pricing/1.0.0": {
+        "type": "project"
+      }
+    },
+    "net10.0/linux-x64": {
+      "TUnit/1.0.0": {
+        "type": "package",
+        "dependencies": {
+          "TUnit.Engine": "1.0.0",
+          "Microsoft.Testing.Extensions.CodeCoverage": "18.0.0"
+        }
+      },
+      "TUnit.Engine/1.0.0": {
+        "type": "package"
+      },
+      "Microsoft.Testing.Extensions.CodeCoverage/18.0.0": {
+        "type": "package"
+      },
+      "Pricing/1.0.0": {
+        "type": "project"
+      }
+    }
+  },
+  "project": {
+    "version": "1.0.0",
+    "frameworks": {
+      "net10.0": {
+        "targetAlias": "net10.0",
+        "dependencies": {
+          "TUnit": {
+            "target": "Package",
+            "version": "[1.0.0, )"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "case": "007-clean-graph",
+  "summary": "Allowed versions of banned packages give no finding and exit 0",
+  "today": "2026-11-27",
+  "exit": 0,
+  "findings": []
+}

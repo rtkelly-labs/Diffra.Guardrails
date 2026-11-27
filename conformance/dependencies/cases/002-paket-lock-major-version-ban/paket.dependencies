@@ -1,0 +1,8 @@
+source https://api.nuget.org/v3/index.json
+
+nuget Pricing.Testing.Helpers = 2.0.0
+
+group Legacy
+  source https://api.nuget.org/v3/index.json
+
+  nuget FluentAssertions ~> 7.2

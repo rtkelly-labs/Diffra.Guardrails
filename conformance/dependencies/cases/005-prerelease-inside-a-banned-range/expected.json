@@ -1,0 +1,15 @@
+{
+  "case": "005-prerelease-inside-a-banned-range",
+  "summary": "A prerelease of a banned major sorts below 8.0 but is still banned",
+  "today": "2026-11-27",
+  "exit": 1,
+  "findings": [
+    {
+      "rule": "DFG601",
+      "path": "Pricing.Tests/project.assets.json",
+      "package": "FluentAssertions",
+      "version": "8.0.0-rc.1",
+      "via": ["FluentAssertions 8.0.0-rc.1"]
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+NUGET
+  remote: https://api.nuget.org/v3/index.json
+    FluentAssertions (8.1)
+      System.Configuration.ConfigurationManager (>= 4.4)
+    Pricing.Testing.Helpers (2.0)
+      FluentAssertions (>= 8.0)
+    System.Configuration.ConfigurationManager (4.4)
+
+GROUP Legacy
+NUGET
+  remote: https://api.nuget.org/v3/index.json
+    FluentAssertions (7.2)

@@ -104,7 +104,10 @@ does. Copy it into the repository and import it from `Directory.Build.targets`:
 - **It runs after `ResolvePackageAssets`**, in each project, on that project's
   `project.assets.json` (passed with `--graph`, so the finding names it from the ban file's
   directory). A solution build, a single-project build and `--no-restore` all run it;
-  `dotnet restore` alone does not, and nor do IDE design-time builds.
+  `dotnet restore` alone does not. It is skipped when `DesignTimeBuild` is `true`, as in an IDE's
+  design-time builds.
+- **A multi-targeted project is checked once per target framework.** With findings, each framework
+  prints them, and gate mode gives one error per framework.
 - **It checks only restore graphs.** `paket.lock` and `dotnet-tools.json` are not part of a
   project's build; the repository-wide command in CI covers them.
 - **It never emits a warning.** Report mode prints messages, so `TreatWarningsAsErrors` cannot turn

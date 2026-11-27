@@ -1,0 +1,2 @@
+nuget FluentAssertions >= 8.0 // commercial licence from 8.0
+nuget Moq >= 4.20.0 < 4.20.2 // SponsorLink releases

@@ -1,0 +1,2 @@
+nuget Verify exempt-until: 2027-11-30 // small-revenue licence; review each year
+nuget Pricing.Reports exempt-until: 2026-10-31 // trial licence while a replacement is chosen

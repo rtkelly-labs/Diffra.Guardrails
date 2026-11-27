@@ -1,0 +1,1 @@
+nuget DotNet-Coverage // closed source; use coverlet and ReportGenerator

@@ -1,0 +1,1 @@
+nuget Moq >= 4.20.0 < 4.20.2 // 4.20.0 and 4.20.1 shipped SponsorLink, which hashed the developer's git email

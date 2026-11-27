@@ -16,3 +16,5 @@ Status: design. Nothing is built in this repository yet.
 - [docs/adapters.md](docs/adapters.md): what a language adapter must do, and which existing linter
   rules it reuses.
 - [conformance/](conformance/README.md): the cases every adapter must agree on.
+- [docs/dependencies.md](docs/dependencies.md): `deps check`, which fails a build that resolves a
+  banned package (rules DFG601–DFG602).

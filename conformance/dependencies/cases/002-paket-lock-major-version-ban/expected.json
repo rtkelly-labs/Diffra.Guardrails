@@ -1,0 +1,15 @@
+{
+  "case": "002-paket-lock-major-version-ban",
+  "summary": "paket.lock: a major-version ban catches 8.x in one group and leaves 7.x in another",
+  "today": "2026-11-27",
+  "exit": 1,
+  "findings": [
+    {
+      "rule": "DFG601",
+      "path": "paket.lock",
+      "package": "FluentAssertions",
+      "version": "8.1",
+      "via": ["Pricing.Testing.Helpers 2.0", "FluentAssertions 8.1"]
+    }
+  ]
+}

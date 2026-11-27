@@ -15,7 +15,7 @@ public static class DepsCommand
 
     public const string Usage =
         "usage: diffra-guardrails deps check [--root <dir>] [--bans <file>] [--exclude <path>]... "
-        + "[--format agent|json] [--today yyyy-MM-dd]";
+        + "[--graph <file>]... [--format agent|json] [--today yyyy-MM-dd]";
 
     private static readonly JsonSerializerOptions Json = new()
     {
@@ -35,6 +35,7 @@ public static class DepsCommand
         string? bans = null;
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
         var excludes = new List<string>();
+        var graphs = new List<string>();
         for (var i = 1; i < args.Count; i++)
         {
             if (i + 1 >= args.Count)
@@ -54,6 +55,9 @@ public static class DepsCommand
                     break;
                 case "--exclude":
                     excludes.Add(value);
+                    break;
+                case "--graph":
+                    graphs.Add(value);
                     break;
                 case "--format" when value is "agent" or "json":
                     format = value;
@@ -85,7 +89,7 @@ public static class DepsCommand
         try
         {
             var banList = BanList.Parse(File.ReadAllText(banPath), banName);
-            var files = DependencyCheck.Discover(root, excludes);
+            var files = graphs.Count == 0 ? DependencyCheck.Discover(root, excludes) : Named(root, graphs);
             if (files.Count == 0)
             {
                 error.WriteLine(
@@ -120,4 +124,28 @@ public static class DepsCommand
             return 2;
         }
     }
+
+    /// <summary>
+    /// Graph files named with <c>--graph</c>, relative to the root so findings name them as discovery would.
+    /// A named file that is missing, or is not a graph file, is an error: it must not pass as clean.
+    /// </summary>
+    private static List<string> Named(string root, IEnumerable<string> graphs) =>
+        graphs.Select(graph =>
+            {
+                var full = Path.GetFullPath(graph, root);
+                if (!File.Exists(full))
+                {
+                    throw new FileNotFoundException($"--graph {graph}: no such file.");
+                }
+
+                if (Path.GetFileName(full) is not (GraphReaders.AssetsFile or GraphReaders.PaketLock or GraphReaders.ToolManifest))
+                {
+                    throw new FormatException(
+                        $"--graph {graph}: not a {GraphReaders.AssetsFile}, {GraphReaders.PaketLock} or {GraphReaders.ToolManifest}.");
+                }
+
+                return Path.GetRelativePath(root, full).Replace('\\', '/');
+            })
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
 }

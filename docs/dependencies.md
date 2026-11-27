@@ -74,14 +74,47 @@ visible.
 
 ```text
 diffra-guardrails deps check [--root <dir>] [--bans <file>] [--exclude <path>]...
-                             [--format agent|json] [--today yyyy-MM-dd]
+                             [--graph <file>]... [--format agent|json] [--today yyyy-MM-dd]
 ```
 
 - Exit 0 when nothing is banned; 1 when a gated finding remains; 2 for usage errors, an unreadable
   ban file or graph file, or no graph file at all.
+- `--graph` checks only the named graph files instead of searching the root. Each must exist and be
+  one of the three file names above; paths in findings are still relative to the root.
 - `--today` fixes the date exemptions are compared with; the corpus uses it.
 - `agent` format: `path:line DFG601 message`, then `fix:` on the next line. `json`: an array of
   finding objects.
+
+## During a build
+
+[`msbuild/Diffra.Guardrails.Dependencies.targets`](../msbuild/Diffra.Guardrails.Dependencies.targets)
+runs the check in every project's build, so a local build reports a banned package before CI
+does. Copy it into the repository and import it from `Directory.Build.targets`:
+
+```xml
+<Import Project="$(MSBuildThisFileDirectory)build/Diffra.Guardrails.Dependencies.targets" />
+```
+
+| Property | Default | Meaning |
+| --- | --- | --- |
+| `DiffraGuardrailsDepsMode` | `report` | `report` prints findings and never fails; `gate` fails the build on a finding, or when the check cannot run; `off` |
+| `DiffraGuardrailsBanFile` | nearest `banned.dependencies` at or above the project | with none, the target does nothing |
+| `DiffraGuardrailsCommand` | `dotnet tool run diffra-guardrails` | how to start the tool |
+
+- **It runs after `ResolvePackageAssets`**, in each project, on that project's
+  `project.assets.json` (passed with `--graph`, so the finding names it from the ban file's
+  directory). A solution build, a single-project build and `--no-restore` all run it;
+  `dotnet restore` alone does not, and nor do IDE design-time builds.
+- **It checks only restore graphs.** `paket.lock` and `dotnet-tools.json` are not part of a
+  project's build; the repository-wide command in CI covers them.
+- **It never emits a warning.** Report mode prints messages, so `TreatWarningsAsErrors` cannot turn
+  it into a failure. Gate mode emits one error per project, after the findings and their fixes.
+- **A missing tool is not a finding.** Exit 1 counts as findings only when the output names a
+  DFG6xx rule; a `dotnet tool run` that cannot find the tool also exits 1. When the check cannot
+  run, report mode says so and carries on, and gate mode fails.
+- **A clean result is stamped for the day.** The stamp in `obj/` is named by the UTC date, so a
+  no-op build skips the check until the graph or the ban file changes, and an exemption that expires
+  is still caught the next day. Findings are never stamped, so they print on every build.
 
 ## Finding text
 
@@ -110,8 +143,6 @@ case-insensitively; build metadata ignored. This is implemented in Core rather t
 
 ## Not yet
 
-- **An MSBuild hook** (`Directory.Build.targets` running the check after restore), so a local build
-  fails as well as CI.
 - **A pre-commit or edit-time hook**, as for the test-structure rules
   ([interventions](interventions.md#2-edit-time-feedback)).
 - **Diffra evidence.** Findings are not yet written to the metrics payload.

@@ -1,0 +1,83 @@
+<Project>
+  <!--
+    Runs `diffra-guardrails deps check` on each project's restored graph during the build, so a
+    banned package fails (or is reported by) a local build as well as CI. See docs/dependencies.md.
+
+    Copy this file into the repository and import it from Directory.Build.targets, for example:
+
+      <Import Project="$(MSBuildThisFileDirectory)build/Diffra.Guardrails.Dependencies.targets" />
+
+    Properties, all optional:
+      DiffraGuardrailsDepsMode     report (default): print findings, never fail the build.
+                                   gate: fail the build on a finding, or when the check cannot run.
+                                   off: do nothing.
+      DiffraGuardrailsBanFile      The ban file. Default: the nearest banned.dependencies at or above
+                                   the project directory. With none, the target does nothing.
+      DiffraGuardrailsCommand      How to start the tool. Default: dotnet tool run diffra-guardrails
+                                   (a local tool manifest).
+
+    It never emits MSBuild warnings, so TreatWarningsAsErrors cannot turn report mode into a failure.
+  -->
+  <PropertyGroup>
+    <DiffraGuardrailsDepsMode Condition="'$(DiffraGuardrailsDepsMode)' == ''">report</DiffraGuardrailsDepsMode>
+    <DiffraGuardrailsBanFile Condition="'$(DiffraGuardrailsBanFile)' == ''">$([MSBuild]::GetPathOfFileAbove('banned.dependencies', '$(MSBuildProjectDirectory)'))</DiffraGuardrailsBanFile>
+    <DiffraGuardrailsCommand Condition="'$(DiffraGuardrailsCommand)' == ''">dotnet tool run diffra-guardrails</DiffraGuardrailsCommand>
+  </PropertyGroup>
+
+  <!--
+    After ResolvePackageAssets, so it runs on every build that reads the restored graph, including
+    builds with no-restore. The stamp carries the date: a clean result is not checked again that day
+    unless the graph or the ban file changes, and an exemption that expires is still caught the next
+    day. The stamp is written only when the check is clean, so findings are printed on every build.
+  -->
+  <Target Name="DiffraGuardrailsCheckDependencies"
+          AfterTargets="ResolvePackageAssets"
+          Condition="'$(DiffraGuardrailsDepsMode)' != 'off' and '$(DesignTimeBuild)' != 'true' and '$(DiffraGuardrailsBanFile)' != '' and '$(ProjectAssetsFile)' != '' and Exists('$(ProjectAssetsFile)')"
+          Inputs="$(ProjectAssetsFile);$(DiffraGuardrailsBanFile)"
+          Outputs="$(MSBuildProjectExtensionsPath)diffra-guardrails-deps.$([System.DateTime]::UtcNow.ToString('yyyy-MM-dd')).stamp">
+    <Error Condition="'$(DiffraGuardrailsDepsMode)' != 'report' and '$(DiffraGuardrailsDepsMode)' != 'gate'"
+           Text="DiffraGuardrailsDepsMode is '$(DiffraGuardrailsDepsMode)'; use report, gate or off." />
+
+    <PropertyGroup>
+      <_DiffraDepsStamp>$(MSBuildProjectExtensionsPath)diffra-guardrails-deps.$([System.DateTime]::UtcNow.ToString('yyyy-MM-dd')).stamp</_DiffraDepsStamp>
+      <_DiffraDepsRoot>$([System.IO.Path]::GetDirectoryName('$(DiffraGuardrailsBanFile)'))</_DiffraDepsRoot>
+    </PropertyGroup>
+
+    <Exec Command="$(DiffraGuardrailsCommand) deps check --root &quot;$(_DiffraDepsRoot)&quot; --bans &quot;$(DiffraGuardrailsBanFile)&quot; --graph &quot;$(ProjectAssetsFile)&quot;"
+          WorkingDirectory="$(_DiffraDepsRoot)"
+          IgnoreExitCode="true"
+          IgnoreStandardErrorWarningFormat="true"
+          ConsoleToMSBuild="true"
+          StandardOutputImportance="high"
+          StandardErrorImportance="low">
+      <Output TaskParameter="ExitCode" PropertyName="_DiffraDepsExit" />
+      <Output TaskParameter="ConsoleOutput" ItemName="_DiffraDepsOutput" />
+    </Exec>
+
+    <PropertyGroup>
+      <_DiffraDepsText>@(_DiffraDepsOutput, ' ')</_DiffraDepsText>
+      <!-- Exit 1 alone is not enough: a missing tool or a failed `dotnet tool run` exits 1 too. -->
+      <_DiffraDepsFound Condition="'$(_DiffraDepsExit)' == '1' and $(_DiffraDepsText.Contains(' DFG60'))">true</_DiffraDepsFound>
+      <_DiffraDepsBroken Condition="'$(_DiffraDepsExit)' != '0' and '$(_DiffraDepsFound)' != 'true'">true</_DiffraDepsBroken>
+    </PropertyGroup>
+
+    <Error Condition="'$(_DiffraDepsFound)' == 'true' and '$(DiffraGuardrailsDepsMode)' == 'gate'"
+           File="$(ProjectAssetsFile)"
+           Text="$(MSBuildProjectName) resolves a banned package; each finding and its fix is printed above." />
+    <Message Condition="'$(_DiffraDepsFound)' == 'true' and '$(DiffraGuardrailsDepsMode)' == 'report'"
+             Importance="high"
+             Text="$(MSBuildProjectName) resolves a banned package (report mode: the build is not failed)." />
+
+    <Error Condition="'$(_DiffraDepsBroken)' == 'true' and '$(DiffraGuardrailsDepsMode)' == 'gate'"
+           Text="The banned dependency check could not run (exit $(_DiffraDepsExit)): $(_DiffraDepsText)" />
+    <Message Condition="'$(_DiffraDepsBroken)' == 'true' and '$(DiffraGuardrailsDepsMode)' == 'report'"
+             Importance="high"
+             Text="The banned dependency check could not run (exit $(_DiffraDepsExit)), so it was skipped: $(_DiffraDepsText)" />
+
+    <ItemGroup Condition="'$(_DiffraDepsExit)' == '0'">
+      <_DiffraDepsOldStamps Include="$(MSBuildProjectExtensionsPath)diffra-guardrails-deps.*.stamp" />
+    </ItemGroup>
+    <Delete Condition="'$(_DiffraDepsExit)' == '0'" Files="@(_DiffraDepsOldStamps)" ContinueOnError="true" />
+    <Touch Condition="'$(_DiffraDepsExit)' == '0'" Files="$(_DiffraDepsStamp)" AlwaysCreate="true" />
+  </Target>
+</Project>

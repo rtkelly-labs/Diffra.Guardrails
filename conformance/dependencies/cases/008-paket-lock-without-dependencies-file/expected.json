@@ -1,0 +1,15 @@
+{
+  "case": "008-paket-lock-without-dependencies-file",
+  "summary": "paket.lock with no paket.dependencies beside it: the finding has no path, because the direct dependencies are unknown",
+  "today": "2026-11-27",
+  "exit": 1,
+  "findings": [
+    {
+      "rule": "DFG601",
+      "path": "paket.lock",
+      "package": "Pricing.Licensing",
+      "version": "1.4",
+      "via": []
+    }
+  ]
+}

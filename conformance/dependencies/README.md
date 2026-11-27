@@ -39,6 +39,7 @@ conformance/dependencies/
 | 005-prerelease-inside-a-banned-range | `8.0.0-rc.1` sorts below `8.0` but is still banned by `>= 8.0` | DFG601 |
 | 006-tool-manifest-and-id-case | A local tool in `.config/dotnet-tools.json`, which neither restore graph lists | DFG601 |
 | 007-clean-graph | Allowed versions of banned packages | none, exit 0 |
+| 008-paket-lock-without-dependencies-file | `paket.lock` alone: the direct dependencies are unknown, so `via` is empty | DFG601 |
 
 Usage errors (a ban line with no reason, an unknown operator, a root with no graph file) exit 2
 and are unit tests, not cases.

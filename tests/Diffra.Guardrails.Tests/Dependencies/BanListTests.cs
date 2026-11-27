@@ -53,4 +53,25 @@ public class BanListTests
         // Assert
         exit.Should().Be(2, because: "an unrestored repository is not evidence of a clean one");
     }
+
+    [Fact]
+    public void An_excluded_directory_is_not_read()
+    {
+        // Arrange
+        var root = Directory.CreateTempSubdirectory("diffra-deps-").FullName;
+        File.WriteAllText(Path.Combine(root, "banned.dependencies"), "nuget Pricing.Licensing // proprietary licence\n");
+        foreach (var folder in new[] { "src", "fixtures/bad" })
+        {
+            Directory.CreateDirectory(Path.Combine(root, folder));
+        }
+
+        File.WriteAllText(Path.Combine(root, "src", "paket.lock"), "NUGET\n    Pricing.Helpers (1.0)\n");
+        File.WriteAllText(Path.Combine(root, "fixtures", "bad", "paket.lock"), "NUGET\n    Pricing.Licensing (1.0)\n");
+
+        // Act
+        var exit = DepsCommand.Run(["check", "--root", root, "--exclude", "fixtures"], new StringWriter(), new StringWriter());
+
+        // Assert
+        exit.Should().Be(0, because: "the only banned package is under the excluded fixtures directory");
+    }
 }

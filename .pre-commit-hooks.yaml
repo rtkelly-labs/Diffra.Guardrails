@@ -1,0 +1,11 @@
+# Hooks this repository offers to pre-commit (https://pre-commit.com). See docs/dependencies.md.
+- id: diffra-guardrails-deps
+  name: banned dependencies (DFG601, DFG602)
+  description: Fails when a banned package version is resolved in a restore graph, paket.lock or tool manifest.
+  # The tool comes from the repository's local tool manifest. Override `entry` to start it another way.
+  entry: dotnet tool run diffra-guardrails deps check
+  language: system
+  # The check reads the whole repository's resolved graphs, not the files being committed.
+  pass_filenames: false
+  # Run only when a commit touches something that can change what is resolved, or the ban list.
+  files: (^|/)(banned\.dependencies|paket\.(dependencies|lock)|dotnet-tools\.json|packages\.lock\.json|Directory\.(Packages|Build)\.(props|targets)|[^/]+\.(cs|fs|vb)proj)$

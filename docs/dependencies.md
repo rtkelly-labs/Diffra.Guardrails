@@ -119,6 +119,36 @@ does. Copy it into the repository and import it from `Directory.Build.targets`:
   no-op build skips the check until the graph or the ban file changes, and an exemption that expires
   is still caught the next day. Findings are never stamped, so they print on every build.
 
+## Before a commit
+
+The repository's [`.pre-commit-hooks.yaml`](../.pre-commit-hooks.yaml) offers the hook
+`diffra-guardrails-deps` to [pre-commit](https://pre-commit.com):
+
+```yaml
+repos:
+  - repo: https://github.com/rtkelly-labs/Diffra.Guardrails
+    rev: <full commit SHA>
+    hooks:
+      - id: diffra-guardrails-deps
+```
+
+- **It runs only when a commit touches** a project file, `Directory.Packages.props`,
+  `Directory.Build.props` or `.targets`, `paket.dependencies`, `paket.lock`, `packages.lock.json`,
+  `dotnet-tools.json` or `banned.dependencies`. It then checks the whole repository, not the staged
+  files.
+- **It starts the tool with `dotnet tool run`**, so the repository needs the tool in its local
+  manifest. Override `entry` to start it another way.
+- **It reads what is on disk.** `project.assets.json` reflects the last restore, not the project
+  file being committed, so restore before committing a package change. `paket.lock` and
+  `dotnet-tools.json` are committed files and are always current.
+- **A fresh clone is not checked.** With no graph file the command exits 2 and the commit is
+  blocked, which says to restore first. But the local tool manifest that installs the tool is
+  itself a graph file, so in such a repository an unrestored project is not reported: only the
+  manifest is checked, and the hook passes.
+
+There is no edit-time hook for this family. An edit to a project file changes nothing the check can
+see until the next restore, and the build-time targets above already report at that point.
+
 ## Finding text
 
 `message` and `fix` are a public contract, like the test-structure rules' text. Only the names in
@@ -146,8 +176,6 @@ case-insensitively; build metadata ignored. This is implemented in Core rather t
 
 ## Not yet
 
-- **A pre-commit or edit-time hook**, as for the test-structure rules
-  ([interventions](interventions.md#2-edit-time-feedback)).
 - **Diffra evidence.** Findings are not yet written to the metrics payload.
 - **Licence lookup.** Bans name packages; the command does not read licence metadata. A licence
   scan would find candidates for the ban file, not replace it.

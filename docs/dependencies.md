@@ -74,7 +74,8 @@ visible.
 
 ```text
 diffra-guardrails deps check [--root <dir>] [--bans <file>] [--exclude <path>]...
-                             [--graph <file>]... [--format agent|json] [--today yyyy-MM-dd]
+                             [--graph <file>]... [--today yyyy-MM-dd] [--format agent|json]
+diffra-guardrails deps payload [the same options as check] --out <dir> [--scope <name>]
 ```
 
 - Exit 0 when nothing is banned; 1 when a gated finding remains; 2 for usage errors, an unreadable
@@ -84,6 +85,34 @@ diffra-guardrails deps check [--root <dir>] [--bans <file>] [--exclude <path>]..
 - `--today` fixes the date exemptions are compared with; the corpus uses it.
 - `agent` format: `path:line DFG601 message`, then `fix:` on the next line. `json`: an array of
   finding objects.
+
+## Diffra evidence
+
+`deps payload` runs the same check and writes the findings as a Diffra metrics payload,
+`<out>/dependency-policy-v1.json`, in the shape described in
+[the adapter contract](adapters.md#the-diffra-metrics-payload):
+
+```json
+{
+  "scope": "example/pricing",
+  "methodology": "dependency-policy-v1",
+  "metrics": {
+    "files": {
+      "Pricing.Tests/obj/project.assets.json": {
+        "DFG601": { "value": 1, "unit": "violations" }
+      }
+    }
+  }
+}
+```
+
+- **Per graph file, per rule**: the number of banned package versions resolved, the same count
+  as the findings. Lower is better, and a clean graph file is absent.
+- **One payload**, so DFG601 and DFG602 share one budget. Exemptions in date are not counted.
+- **It measures; it does not gate.** It exits 0 once the payload is written, whatever it counts,
+  and 2 for the same errors as `check`, including no graph file. `--scope` defaults to the name of
+  the root directory.
+- **The methodology is versioned.** Changing what is counted bumps `dependency-policy-v1`.
 
 ## During a build
 
@@ -176,7 +205,8 @@ case-insensitively; build metadata ignored. This is implemented in Core rather t
 
 ## Not yet
 
-- **Diffra evidence.** Findings are not yet written to the metrics payload.
+- **Diffra rules files and upload.** The payload is written, but no rules file or CI step yet
+  uploads it or evaluates it against a baseline.
 - **Licence lookup.** Bans name packages; the command does not read licence metadata. A licence
   scan would find candidates for the ban file, not replace it.
 - **`paket.references`.** Paket graphs are checked per group, not per project.

@@ -26,7 +26,8 @@ conformance/dependencies/
 - **Findings are a set**, compared on `rule`, `path`, `package`, `version` and `via`. The line is
   not compared: in a JSON graph file it says little, and it moves with formatting.
 - The test project runs every case through the command in-process
-  (`DependencyConformanceTests`).
+  (`DependencyConformanceTests`), and through `deps payload`, whose counts must match the case's
+  findings (`DependencyPayloadTests`).
 
 ## Cases
 
